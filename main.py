@@ -1,0 +1,260 @@
+
+import os.path as op
+from os import mkdir, rename
+import shutil
+import pandas as pd
+import mne
+import json
+from mne_bids import BIDSPath, write_raw_bids
+from mne_bids.copyfiles import copyfile_brainvision
+
+SUBJECTS = range(1, 81)
+BIDS_ROOT = op.dirname(op.realpath(__file__))
+EEG_SOURCE = "data/eeg"
+EYE_SOURCE = "data/eyetracking"
+BEH_SOURCE = "data/behavioral"
+
+
+
+def copy_brainvision():
+    data_path = op.join(op.dirname(op.realpath(__file__)), 'data/eeg')
+    vhdr = op.join(data_path, 'p001.vhdr')
+    vhdr_new = op.join(data_path, 'sub-01-.vhdr')
+    copyfile_brainvision(vhdr, vhdr_new, verbose=True)
+    raw = mne.io.read_raw_brainvision(vhdr)
+    raw_renamed = mne.io.read_raw_brainvision(vhdr_new)
+
+
+"""
+Create a description JSON for the dataset and dump it into the dataset_description.json file
+"""
+
+
+def make_dataset_description():
+    dataset_description_json = {
+        "Name": "mpib_memoreeg",    #REQUIRED
+        "BIDSVersion": "1.7.0",     #REQUIRED
+        "DatasetType": "raw",
+        "License": "",
+        "Authors": [
+            ""
+        ],
+        "Acknowledgements": "",
+        "HowToAcknowledge": "",
+        "Funding": "",
+        "EthicsApproval": "",
+        "ReferencesAndLinks": "",
+        "DatasetDOI": ""
+    }
+    filename = op.join(BIDS_ROOT, "dataset_description.json")
+    with open(filename, "w", encoding="utf-8") as fout:
+            json.dump(dataset_description_json, fout, ensure_ascii=False, indent=4)
+            fout.write("\n")
+
+
+"""
+Create participant files: 
+- participants.tsv with description of participants' characteristics
+- participants.json with description of columns and their values in participants.tsv
+"""
+
+
+def make_participants():
+
+    participants_json = {
+        "participant_id": {
+            "Description": "Unique participant identifier"
+        },
+        "age": {
+            "Description": "Age of a participant",
+            "Units": "years"
+        },
+        "handedness": {
+            "Description": "Handedness of a participant, reported by the participant",
+            "Levels": {
+                1: "righthanded",
+                0: "lefthanded",
+            }
+        },
+        "gender": {
+            "Description": "Gender of a participant, reported by the participant",
+            "Levels": {
+                "F": "Female",
+                "M": "Male"
+            }
+        },
+        "stimuli_set": {
+            "Description": "A predetermined set of stimuli used with a given participant",
+            "Levels": {
+                1:"",
+                2:"",
+                3:""
+            }
+        },
+        "distractor": {
+            "Description": "Presence of a distractor stimulus with a given participant",
+            "Levels": {
+                1: "distractors have been used",
+                0: "no distractor has been used"
+
+            }
+        },
+        "distractor_set": {
+            "Description": "A predetermined set of distractor stimuli used with a given participant (if distractor used)",
+            "Levels": {
+                1: "",
+                2: "",
+                3: ""
+            }
+        }
+    }
+    filename = op.join(BIDS_ROOT, "participants.json")
+    with open(filename, "w", encoding="utf-8") as fout:
+        json.dump(participants_json, fout, ensure_ascii=False, indent=4)
+        fout.write("\n")
+
+    # Take data from the log
+    participants = pd.read_csv('participants_log.tsv', sep='\t')
+
+    # We have 80 "true" participants with IDs ranging from p001 to p080.
+    # Other IDs, e.g. for pilot participants, are to filter out.
+    id_pattern = r'p0\d\d'
+    participants = participants[participants.Parti_ID.str.match(id_pattern)]
+
+    # add BIDS-formatted ID and rename columns
+    participants['participant_id'] = [f'sub-{sub:02}' for sub in SUBJECTS]
+    participants = participants.rename(columns={'Age': 'age', 'Righthanded (1=yes, 0=no)': 'handedness', 'Gender': 'gender', 'Stimuli_set': 'stimuli_set', 'Distractor (yes=1 no=0)': 'distractor', 'Distractor_set': 'distractor_set'})
+
+    # Write relevant data to the participants.tsv file
+    filename = op.join(BIDS_ROOT, "participants.tsv")
+    participants[['participant_id', 'age', 'handedness', 'gender', 'stimuli_set', 'distractor', 'distractor_set']].to_csv(filename, index=False, na_rep="n/a", sep="\t")
+
+
+"""
+With help of mne_bids create data structure, starting with EEG data
+"""
+
+
+def make_raw_bids():
+
+    for subject in range(1, 5):
+        subject_id = f'{subject:02}'
+        task = "memoreeg"
+
+        data_path = op.join(op.dirname(op.realpath(__file__)), EEG_SOURCE)
+        vhdr = op.join(data_path, f'p0{subject:02}.vhdr')
+        raw = mne.io.read_raw_brainvision(vhdr)
+        bids_path = BIDSPath(subject=subject_id, task=task, root=BIDS_ROOT)
+        write_raw_bids(raw, bids_path, overwrite=True)
+
+
+def make_bidsignore():
+    text = """README.md"""
+
+    filename = op.join(BIDS_ROOT, ".bidsignore")
+    with open(filename, 'w', encoding='utf-8') as output:
+        output.write(text)
+
+
+def make_behavioral():
+
+    behavioral_json = {
+        "TaskName": "memoreeg",
+        "Instructions": "",
+        "TaskDescription": "",
+        "InstitutionName": "Max Planck Institute for Human Development",
+        "InstitutionAddress": "Lentzeallee 94, 14195 Berlin, Germany",
+        "task_version": {
+            "Description": "Experiment script script version used in the trial",
+            "Levels": {
+                "MemorEEG_distractor_00"
+            }
+        },
+        "date": {
+
+        },
+        "sub_id": {
+
+        },
+        "sub_gender": {
+
+        },
+        "sub_age": {
+
+        },
+        "block_number": {
+
+        },
+        "trial": {
+
+        },
+        "object_1_name": {
+
+        },
+        "object_1_id": {
+
+        },
+        "object_1_rot": {
+
+        },
+        "object_2_name": {
+
+        },
+        "object_2_id": {
+
+        },
+        "object_2_rot": {
+
+        },
+        "retro_cue": {
+
+        },
+        "object_cue_id": {
+
+        },
+        "object_cue_rot": {
+
+        },
+        "type_of_task": {
+
+        },
+        "type_of_ings": {
+
+        },
+        "position_odd_pings": {
+
+        },
+        "object_test_name": {
+
+        },
+        "object_test_id": {
+
+        },
+        "object_test_rot": {
+
+        },
+        "rt_resp_concrete": {
+
+        },
+        "acc_trial_concrete": {
+
+        },
+    }
+
+    for subject in range(1, 5):
+        beh_path = op.join(BIDS_ROOT, f"sub-{subject:02}/beh")
+        mkdir(beh_path)
+        data_path = op.join(BIDS_ROOT, BEH_SOURCE, f'resultfile_p0{subject:02}.txt')
+        data = pd.read_csv(data_path, delim_whitespace=True)
+        data.to_csv(op.join(beh_path, f'sub-{subject:02}_task-memoreeg_beh.tsv'), index=False, na_rep="n/a", sep="\t")
+
+
+def main():
+    make_raw_bids()
+    make_behavioral()
+    make_participants()
+    make_dataset_description()
+
+
+if __name__ == '__main__':
+    main()
