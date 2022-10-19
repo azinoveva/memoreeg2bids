@@ -7,6 +7,7 @@ import mne
 import json
 from mne_bids import BIDSPath, write_raw_bids
 from mne_bids.copyfiles import copyfile_brainvision
+import eeg
 
 SUBJECTS = range(1, 81)
 BIDS_ROOT = op.dirname(op.realpath(__file__))
@@ -17,6 +18,9 @@ BEH_SOURCE = "data/behavioral"
 
 
 def copy_brainvision():
+    """
+    :return:
+    """
     data_path = op.join(op.dirname(op.realpath(__file__)), 'data/eeg')
     vhdr = op.join(data_path, 'p001.vhdr')
     vhdr_new = op.join(data_path, 'sub-01-.vhdr')
@@ -24,13 +28,10 @@ def copy_brainvision():
     raw = mne.io.read_raw_brainvision(vhdr)
     raw_renamed = mne.io.read_raw_brainvision(vhdr_new)
 
-
-"""
-Create a description JSON for the dataset and dump it into the dataset_description.json file
-"""
-
-
 def make_dataset_description():
+    """
+    Create a description JSON for the dataset and dump it into the dataset_description.json file
+    """
     dataset_description_json = {
         "Name": "mpib_memoreeg",    #REQUIRED
         "BIDSVersion": "1.7.0",     #REQUIRED
@@ -51,16 +52,12 @@ def make_dataset_description():
             json.dump(dataset_description_json, fout, ensure_ascii=False, indent=4)
             fout.write("\n")
 
-
-"""
-Create participant files: 
-- participants.tsv with description of participants' characteristics
-- participants.json with description of columns and their values in participants.tsv
-"""
-
-
 def make_participants():
-
+    """
+    Create participant files:
+    - participants.tsv with description of participants' characteristics
+    - participants.json with description of columns and their values in participants.tsv
+    """
     participants_json = {
         "participant_id": {
             "Description": "Unique participant identifier"
@@ -130,22 +127,13 @@ def make_participants():
     participants[['participant_id', 'age', 'handedness', 'gender', 'stimuli_set', 'distractor', 'distractor_set']].to_csv(filename, index=False, na_rep="n/a", sep="\t")
 
 
-"""
-With help of mne_bids create data structure, starting with EEG data
-"""
-
-
 def make_raw_bids():
+    """
+    With help of mne_bids create data structure, starting with EEG data
+    """
+    eeg_01 = eeg.Subject("01", task="memoreeg")
+    eeg_01.beh_to_bids()
 
-    for subject in range(1, 5):
-        subject_id = f'{subject:02}'
-        task = "memoreeg"
-
-        data_path = op.join(op.dirname(op.realpath(__file__)), EEG_SOURCE)
-        vhdr = op.join(data_path, f'p0{subject:02}.vhdr')
-        raw = mne.io.read_raw_brainvision(vhdr)
-        bids_path = BIDSPath(subject=subject_id, task=task, root=BIDS_ROOT)
-        write_raw_bids(raw, bids_path, overwrite=True)
 
 
 def make_bidsignore():
@@ -157,6 +145,9 @@ def make_bidsignore():
 
 
 def make_behavioral():
+    """
+    :return:
+    """
 
     behavioral_json = {
         "TaskName": "memoreeg",
@@ -251,9 +242,6 @@ def make_behavioral():
 
 def main():
     make_raw_bids()
-    make_behavioral()
-    make_participants()
-    make_dataset_description()
 
 
 if __name__ == '__main__':

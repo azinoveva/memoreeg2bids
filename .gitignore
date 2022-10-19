@@ -26,3 +26,15 @@
 /data/behavioral/resultfile_p003pr.txt
 /data/behavioral/resultfile_p004.txt
 /data/behavioral/resultfile_p004pr.txt
+/dataset_description.json
+/participants.json
+/participants.tsv
+/README
+/sub-01/sub-01_scans.tsv
+/sub-01/beh/sub-01_task-memoreeg_beh.tsv
+/sub-01/eeg/sub-01_task-memoreeg_channels.tsv
+/sub-01/eeg/sub-01_task-memoreeg_eeg.eeg
+/sub-01/eeg/sub-01_task-memoreeg_eeg.json
+/sub-01/eeg/sub-01_task-memoreeg_eeg.vhdr
+/sub-01/eeg/sub-01_task-memoreeg_eeg.vmrk
+/sub-01/eeg/sub-01_task-memoreeg_events.tsv
