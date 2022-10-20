@@ -131,7 +131,8 @@ def make_raw_bids():
     """
     With help of mne_bids create data structure, starting with EEG data
     """
-    eeg_01 = eeg.Subject("01", task="memoreeg")
+    eeg_01 = eeg.Subject(2)
+    eeg_01.eeg_to_bids()
     eeg_01.beh_to_bids()
 
 
@@ -142,102 +143,6 @@ def make_bidsignore():
     filename = op.join(BIDS_ROOT, ".bidsignore")
     with open(filename, 'w', encoding='utf-8') as output:
         output.write(text)
-
-
-def make_behavioral():
-    """
-    :return:
-    """
-
-    behavioral_json = {
-        "TaskName": "memoreeg",
-        "Instructions": "",
-        "TaskDescription": "",
-        "InstitutionName": "Max Planck Institute for Human Development",
-        "InstitutionAddress": "Lentzeallee 94, 14195 Berlin, Germany",
-        "task_version": {
-            "Description": "Experiment script script version used in the trial",
-            "Levels": {
-                "MemorEEG_distractor_00"
-            }
-        },
-        "date": {
-
-        },
-        "sub_id": {
-
-        },
-        "sub_gender": {
-
-        },
-        "sub_age": {
-
-        },
-        "block_number": {
-
-        },
-        "trial": {
-
-        },
-        "object_1_name": {
-
-        },
-        "object_1_id": {
-
-        },
-        "object_1_rot": {
-
-        },
-        "object_2_name": {
-
-        },
-        "object_2_id": {
-
-        },
-        "object_2_rot": {
-
-        },
-        "retro_cue": {
-
-        },
-        "object_cue_id": {
-
-        },
-        "object_cue_rot": {
-
-        },
-        "type_of_task": {
-
-        },
-        "type_of_ings": {
-
-        },
-        "position_odd_pings": {
-
-        },
-        "object_test_name": {
-
-        },
-        "object_test_id": {
-
-        },
-        "object_test_rot": {
-
-        },
-        "rt_resp_concrete": {
-
-        },
-        "acc_trial_concrete": {
-
-        },
-    }
-
-    for subject in range(1, 5):
-        beh_path = op.join(BIDS_ROOT, f"sub-{subject:02}/beh")
-        mkdir(beh_path)
-        data_path = op.join(BIDS_ROOT, BEH_SOURCE, f'resultfile_p0{subject:02}.txt')
-        data = pd.read_csv(data_path, delim_whitespace=True)
-        data.to_csv(op.join(beh_path, f'sub-{subject:02}_task-memoreeg_beh.tsv'), index=False, na_rep="n/a", sep="\t")
 
 
 def main():
