@@ -11,19 +11,19 @@ Combined functionality for creating JSON sidecars. Following options are availab
 def create(task):
     json = {
         'TaskName': task,
+        'TaskDescription': '',
+        'InstitutionName': 'Max Planck Institute for Human Development',
+        'InstitutionAddress': 'Lentzeallee 94, 14195 Berlin, Germany',
         'block_number': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Every experiment session is divided into 10 blocks. The field indicates, which block does the current trial belongs to.',
+            'Levels': 'Number of block ranging from 1 to 10',
         },
         'trial': {
-            'LongName': '',
-            'Description': '',
+            'Description': 'Trial number',
             'Levels': '',
         },
         'object_1_name': {
-            'LongName': '',
-            'Description': '',
+            'Description': 'Filename of the first object',
             'Levels': '',
         },
         'object_1_id': {
