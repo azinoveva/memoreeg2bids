@@ -142,12 +142,6 @@ def main():
     eeg_01.eeg_to_bids()
     eeg_01.beh_to_bids()
 
-    json_path = BIDSPath(root=BIDS_ROOT, suffix="events", extension=".json")
-    json_eeg_events = make_json.eeg_events()
-    with open(json_path, 'w', encoding='utf-8') as output:
-        json.dump(json_eeg_events, output, ensure_ascii=False, indent=4)
-        output.write("\n")
-
 
 if __name__ == '__main__':
     main()

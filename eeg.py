@@ -127,7 +127,16 @@ class Subject:
         events[['onset', 'duration', 'trial', 'sample', 'event', 'rotation', 'position']].to_csv(
             events_path, index=False, na_rep="n/a", sep="\t")
 
-        # Last, let's update the auto-generated JSON.
+        # Next, let's add a JSON sidecar with description of *_events.tsv data
+
+        json_path = BIDSPath(subject=self.id, task=self.task, root=bids_root, datatype='eeg', suffix='events',
+                               extension=".json")
+        json_eeg_events = make_json.eeg_events()
+        with open(json_path, 'w', encoding='utf-8') as output:
+            json.dump(json_eeg_events, output, ensure_ascii=False, indent=4)
+            output.write("\n")
+
+        # Last, let's update the auto-generated metadata with available information.
         json_path = BIDSPath(subject=self.id, task=self.task, root=bids_root, datatype='eeg', suffix='eeg',
                                extension=".json")
         with open(json_path, 'r+') as data:
@@ -146,6 +155,7 @@ class Subject:
             data.seek(0)
             json.dump(eeg_json, data, ensure_ascii=False, indent=4)
             data.truncate()
+
 
 
     def beh_to_bids(self, bids_root=BIDS_ROOT):

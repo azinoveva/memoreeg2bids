@@ -46,9 +46,6 @@ def eeg_events():
                 "245": "Beginning or end of the task"
             }
         },
-        "value": {
-            "Description": "",
-        },
         "event": {
             "Description": "Short description of marked event",
             "Levels": {
