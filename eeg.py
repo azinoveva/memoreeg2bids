@@ -6,8 +6,6 @@ import mne
 import shutil
 import json
 import beh_json
-import events_json
-import datetime
 
 import pandas as pd
 from numpy import nan
@@ -15,6 +13,7 @@ from mne_bids import BIDSPath, write_raw_bids
 
 DATA_PATH = op.join(op.dirname(op.realpath(__file__)), "data")
 BIDS_ROOT = op.dirname(op.realpath(__file__))
+
 
 def get_object_type(stimulus):
     match stimulus:
@@ -75,38 +74,57 @@ class Subject:
 
     def eeg_to_bids(self, bids_root=BIDS_ROOT):
         """
-        Expand the BrainVision EEG data into BIDS.
+        Expand the collected BrainVision data into BIDS-compliant structure.
+        Per default, the data will be expanded into home directory of the script
+        :param bids_root: New location of the data
         """
-        bids_path = BIDSPath(subject=self.id, task=self.task, root=bids_root)
+        # First, let's find and read the source EEG data
         raw = mne.io.read_raw_brainvision(self.vhdr_path)
 
         # Add known metadata
         raw = raw.set_channel_types({"ECG": "ecg", "HEOG": "eog", "VEOG": "eog"})
         raw.info["line_freq"] = 50
 
+        # Use mne-bids to expand the existing data
+        bids_path = BIDSPath(subject=self.id, task=self.task, root=bids_root)
         write_raw_bids(raw, bids_path, overwrite=True)
 
         # Cleaning auto-generated events.tsv from mne-bids
-        events_path = BIDSPath(subject=self.id, task=self.task, root=bids_root, datatype='eeg', suffix='events', extension=".tsv")
+
+        # Second, let's find where the auto-generated _events.tsv file is.
+        events_path = BIDSPath(subject=self.id, task=self.task, root=bids_root, datatype='eeg', suffix='events',
+                               extension=".tsv")
         events = pd.read_csv(events_path, sep="\t")
+
+        # I'll rename one column for a cleaner look
         events.rename(columns={'trial_type': 'trial'}, inplace=True)
 
         # We only want stimuli, so filter the dataset so that it only contains stimulus rows
         events = events[events.trial.str.match(r'Stimulus/S...')]
 
+        # Fill in new columns according to information coded in stimulus ID:
+        # Take the last 3 symbols of event comments and transform them to event codes
         events['trial'] = events['trial'].transform(lambda string: int(string[-3:]))
+        # Define event type using event code
         events['event'] = events['trial'].transform(lambda stimulus: get_object_type(stimulus))
-        events['rotation'] = events['trial'].transform(lambda id: nan if (id > 156) else (id % 20 - 1)*22.5)
-        events['position'] = events['trial'].transform(lambda id: (id % 200 - 1)*22.5 if (201 <= id <= 216) else nan)
+        # Add object rotation if exists
+        events['rotation'] = events['trial'].transform(
+            lambda stimulus: nan if (stimulus > 156) else (stimulus % 20 - 1) * 22.5)
+        # Add object position if exists
+        events['position'] = events['trial'].transform(
+            lambda stimulus: (stimulus % 200 - 1) * 22.5 if (201 <= stimulus <= 216) else nan)
 
+        # Every object position is marked as a separate event RIGHT AFTER the event encoding an object and its
+        # rotation. We use this to couple an object and its position, so that one row represents one real event.
+        # Then we clean the table from unnecessary position-only rows.
         for index, event in events.iterrows():
             if event['event'] == 'position':
-                events.at[index-1, 'position'] = event['position']
+                events.at[index - 1, 'position'] = event['position']
 
         events = events[events.event != 'position']
 
+        # Let's write the new dataframe to _events.tsv
         events.to_csv(events_path, index=False, na_rep="n/a", sep="\t")
-
 
     def beh_to_bids(self, bids_root=BIDS_ROOT):
         """
