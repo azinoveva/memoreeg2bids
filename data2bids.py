@@ -8,7 +8,6 @@ import json
 import make_json
 
 import pandas as pd
-from numpy import nan
 from mne_bids import BIDSPath, write_raw_bids
 
 DATA_PATH = op.join(op.dirname(op.realpath(__file__)), "data")
@@ -48,7 +47,7 @@ def get_object_type(stimulus):
         case 245:
             return 'begin/end'
         case _:
-            return nan
+            return 'n/a'
 
 
 class Subject:
@@ -109,10 +108,10 @@ class Subject:
         events['event'] = events['trial'].transform(lambda stimulus: get_object_type(stimulus))
         # Add object rotation if exists
         events['rotation'] = events['trial'].transform(
-            lambda stimulus: nan if (stimulus > 156) else (stimulus % 20 - 1) * 22.5)
+            lambda stimulus: 'n/a' if (stimulus > 156) else (stimulus % 20 - 1) * 22.5)
         # Add object position if exists
         events['position'] = events['trial'].transform(
-            lambda stimulus: (stimulus % 200 - 1) * 22.5 if (201 <= stimulus <= 216) else nan)
+            lambda stimulus: (stimulus % 200 - 1) * 22.5 if (201 <= stimulus <= 216) else 'n/a')
 
         # Every object position is marked as a separate event RIGHT AFTER the event encoding an object and its
         # rotation. We use this to couple an object and its position, so that one row represents one real event.
@@ -180,6 +179,9 @@ class Subject:
 
         # Drop duplicate header rows
         beh_data = beh_data[beh_data.iloc[:, 0] != beh_data.columns[0]]
+
+        # Fill empty values
+        beh_data.fillna("n/a", inplace=True)
 
         # Write cleared dataset into sub-<ID>_task-<taskname>_beh.tsv file
         beh_data.to_csv(bids_path, sep='\t', index=False)

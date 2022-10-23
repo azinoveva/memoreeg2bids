@@ -4,7 +4,7 @@ import json
 
 from mne_bids import BIDSPath
 
-import eeg
+import data2bids
 import make_json
 
 SUBJECTS = range(1, 81)
@@ -130,17 +130,13 @@ def make_bidsignore():
 
 
 def main():
-    eeg_01 = eeg.Subject(80)
-    eeg_01.eeg_to_bids()
-    eeg_01.beh_to_bids()
-
-    eeg_01 = eeg.Subject(1)
-    eeg_01.eeg_to_bids()
-    eeg_01.beh_to_bids()
-
-    eeg_01 = eeg.Subject(2)
-    eeg_01.eeg_to_bids()
-    eeg_01.beh_to_bids()
+    for subject_id in SUBJECTS:
+        data = data2bids.Subject(subject_id)
+        data.eeg_to_bids(BIDS_ROOT)
+        data.beh_to_bids(BIDS_ROOT)
+    make_dataset_description()
+    make_participants()
+    make_bidsignore()
 
 
 if __name__ == '__main__':
