@@ -5,10 +5,10 @@ import json
 from mne_bids import BIDSPath
 
 import eeg
-import events_json
+import make_json
 
 SUBJECTS = range(1, 81)
-BIDS_ROOT = op.dirname(op.realpath(__file__))
+BIDS_ROOT = op.join(op.dirname(op.realpath(__file__)), "bids")
 DATA_PATH = op.join(op.dirname(op.realpath(__file__)), "data")
 
 
@@ -134,10 +134,18 @@ def main():
     eeg_01.eeg_to_bids()
     eeg_01.beh_to_bids()
 
+    eeg_01 = eeg.Subject(1)
+    eeg_01.eeg_to_bids()
+    eeg_01.beh_to_bids()
+
+    eeg_01 = eeg.Subject(2)
+    eeg_01.eeg_to_bids()
+    eeg_01.beh_to_bids()
+
     json_path = BIDSPath(root=BIDS_ROOT, suffix="events", extension=".json")
-    json_data = events_json.create()
+    json_eeg_events = make_json.eeg_events()
     with open(json_path, 'w', encoding='utf-8') as output:
-        json.dump(json_data, output, ensure_ascii=False, indent=4)
+        json.dump(json_eeg_events, output, ensure_ascii=False, indent=4)
         output.write("\n")
 
 

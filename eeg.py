@@ -5,14 +5,14 @@ import os.path as op
 import mne
 import shutil
 import json
-import beh_json
+import make_json
 
 import pandas as pd
 from numpy import nan
 from mne_bids import BIDSPath, write_raw_bids
 
 DATA_PATH = op.join(op.dirname(op.realpath(__file__)), "data")
-BIDS_ROOT = op.dirname(op.realpath(__file__))
+BIDS_ROOT = op.join(op.dirname(op.realpath(__file__)), "bids")
 
 
 def get_object_type(stimulus):
@@ -124,7 +124,29 @@ class Subject:
         events = events[events.event != 'position']
 
         # Let's write the new dataframe to _events.tsv
-        events.to_csv(events_path, index=False, na_rep="n/a", sep="\t")
+        events[['onset', 'duration', 'trial', 'sample', 'event', 'rotation', 'position']].to_csv(
+            events_path, index=False, na_rep="n/a", sep="\t")
+
+        # Last, let's update the auto-generated JSON.
+        json_path = BIDSPath(subject=self.id, task=self.task, root=bids_root, datatype='eeg', suffix='eeg',
+                               extension=".json")
+        with open(json_path, 'r+') as data:
+            eeg_json = json.load(data)
+            eeg_json["Instructions"] = "Instructions can be found..."
+            eeg_json["EEGReference"] = "FCz"
+            eeg_json["EEGGround"] = "Fpz"
+            eeg_json["InstitutionName"] = "Max Plack Institute for Human Development"
+            eeg_json["InstitutionAddress"] = "Lentzeallee 94, 14195 Berlin, Germany"
+            eeg_json["ManufacturersModelName"] = "BrainAmp DC and BrainAmp ExG"
+            eeg_json["SoftwareVersions"] = "BrainVision Recorder Professional V.1.24.0001"
+            eeg_json["CapManufacturer"] = "EasyCAP"
+            eeg_json["CapManufacturersModelName"] = "actiCAP 64 Ch Standard-2"
+            del eeg_json["EMGChannelCount"]
+            del eeg_json["MiscChannelCount"]
+            data.seek(0)
+            json.dump(eeg_json, data, ensure_ascii=False, indent=4)
+            data.truncate()
+
 
     def beh_to_bids(self, bids_root=BIDS_ROOT):
         """
@@ -155,7 +177,7 @@ class Subject:
         # Create an accompanying JSON sidecar with data description
         json_path = BIDSPath(subject=self.id, task=self.task, root=bids_root, datatype="beh", suffix="beh",
                              extension=".json")
-        json_data = beh_json.create(self.task)
+        json_data = make_json.behavioral(self.task)
         with open(json_path, 'w', encoding='utf-8') as output:
             json.dump(json_data, output, ensure_ascii=False, indent=4)
             output.write("\n")
