@@ -192,11 +192,12 @@ class Subject:
         beh_data.drop(empty_cols + redundant_cols, axis=1, inplace=True)
 
         # Correct typo in column name
-        beh_data.rename(columns={'object_2_ID': 'object_2_id'})
+        beh_data.rename(columns={'object_2_ID': 'object_2_id'}, inplace=True)
 
         # Fill empty values
-        beh_data.fillna("n/a", inplace=True)
-        beh_data = beh_data.applymap(lambda x: str(x).replace("", "n/a"))
+        beh_data.fillna("n/a", inplace=True)    # for true n/a
+        beh_data = beh_data.replace("NaN", "n/a", regex=True)   # for NaN as strings
+        beh_data = beh_data.replace("", "n/a", regex=True)      # for empty cells
 
         # Write cleared dataset into sub-<ID>_task-<taskname>_beh.tsv file
         beh_data.to_csv(bids_path, sep='\t', index=False)
