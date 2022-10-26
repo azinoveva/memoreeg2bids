@@ -168,12 +168,23 @@ class Subject:
         shutil.copy(self.beh_path, bids_path)
 
         # Drop redundant and empty columns
-        beh_data = pd.read_csv(bids_path, delim_whitespace=True)
+        beh_data = pd.read_csv(bids_path, sep='\t')
+
+        # It is not enough to just use any number of whitespaces as delimiter. One edge case supposes that the
+        # participant has neither changed the object, nor the orientation (e.g. the correct object has spawned in the
+        # correct orientation). This means some data will be filled with whitespaces, and this causes data shift for
+        # some trials when using delim_whitespace. So I'm stripping the whitespaces semi-manually.
+        beh_data = beh_data.applymap(lambda x: str(x).replace(" ", ""))
+        beh_data.columns = beh_data.columns.str.replace(" ", "")
 
         # Columns to drop
-        empty_cols = [col for col in beh_data.columns if beh_data[col].isnull().all()]
+        empty_cols = [col for col in beh_data.columns if (beh_data[col].isnull().all() or beh_data[col].eq("NaN").all())]
+
+        # Some columns already carry information from participants.tsv (e.g. age, gender...). Other columns do
+        # not carry any relevant information and have been inherited through adjusting the script from previous
+        # experiments.
         redundant_cols = ['task_version', 'date', 'subID', 'sub_gender', 'sub_age', 'practice', 'righthanded',
-                          'colorset_pins']
+                          'colorset_pins', 'type_of_task', 'type_of_ings', 'position_odd_pings', 'object_test_name', 'block_repe_null']
 
         beh_data.drop(empty_cols + redundant_cols, axis=1, inplace=True)
 
