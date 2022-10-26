@@ -70,8 +70,8 @@ def eeg_events():
             "Units": "Degrees, clockwise, beginning from upright position"
         },
         "position": {
-            "Description": "Offset position of an object, always X units away from the fixation point",
-            "Units": "Degrees, clockwise, beginning with 12PM position"
+            "Description": "Offset position of an object, always away from the fixation point",
+            "Units": "Degrees, clockwise, 12PM as a zero position"
         },
     }
     return json
@@ -85,246 +85,207 @@ def behavioral(task):
     """
     json = {
         'TaskName': task,
-        'TaskDescription': '',
+        'TaskDescription': 'The participant is required to lock their gaze on the fixation point every time it is on '
+                           'the screen. On each trial, two objects are presented one after the other, each rotated in '
+                           'some way. After seeing these objects, a participant hears a cue (eiter One - "Eins", '
+                           'or Two - "Zwei"). The cue indicates which object orientation is to be remembered. In '
+                           'tasks with distractor, an irrelevant item is displayed on the screen before the memory '
+                           'test. In the memory test, the participant sees an object in the center of the screen and '
+                           'is required to match the item and the rotation for the cued object. The participant can '
+                           'change the item by pressing DOWN, and rotate the item freely, pressing LEFT ('
+                           'counter-clockwise) and RIGHT (clockwise). The participant then confirms the item and '
+                           'its orientation by pressing UP. After confirmation, a feedback appears, telling how '
+                           'accurate the participants response has been. After some time, the task times out and the '
+                           'participant sees a feedback telling to respond faster. After that, the new trial starts.',
         'InstitutionName': 'Max Planck Institute for Human Development',
         'InstitutionAddress': 'Lentzeallee 94, 14195 Berlin, Germany',
         'block_number': {
-            'Description': 'Every experiment session is divided into 10 blocks. The field indicates, which block '
+            'Description': 'Every experiment session is divided into 10 blocks. The number indicates, which block '
                            'the current trial belongs to.',
-            'Levels': 'Number of block ranging from 1 to 10',
+            'Units': 'Integer from 1 to 10'
         },
         'trial': {
-            'Description': 'Trial number',
-            'Levels': '',
+            'Description': 'Number of the trial. One trial is one full cycle from showing the first object to showing '
+                           'the trial feedback.',
+            'Units': 'Integer from 1 to 576'
         },
         'object_1_name': {
-            'Description': 'Filename of the first object',
-            'Levels': '',
+            'Description': 'Filename of an object shown first in the trial.'
         },
         'object_1_id': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'ID of an object shown first in the trial. There are 9 objects altogether, for every '
+                           'participant 3 of them are picked pseudo-randomly for the whole experiment, '
+                           'the ID indicates the ID of an object in this picked subgroup.',
+            'Units': 'Integer from 1 to 3'
         },
         'object_1_rot': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Rotation of an object shown first in the trial. There are 16 fixed equidistantly '
+                           'distributed rotations, as if in 16 segments of a circle.',
+            'Units': 'Degrees, clockwise, 12PM as a zero position'
         },
         'object_2_name': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Filename of an object shown second in the trial.'
         },
         'object_2_id': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'ID of an object shown first in the trial. There are 9 objects altogether, for every '
+                           'participant 3 of them are picked pseudo-randomly for the whole experiment, '
+                           'the ID indicates the ID of an object in this picked subgroup.',
+            'Units': 'Integer from 1 to 3'
         },
         'object_2_rot': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Rotation of an object shown first in the trial. There are 16 fixed equidistantly '
+                           'distributed rotations, as if in 16 segments of a circle.',
+            'Units': 'Degrees, clockwise, 12PM as a zero position'
         },
         'retro_cue': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Audial cue, telling a participant, which object and orientation to remember',
+            'Levels': {
+                '1': 'Eins - One. The participant should remember the first object.',
+                '2': 'Zwei - Two. The participant should remember the second object.'
+            },
         },
         'object_cue_id': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'ID of an object cued, either ID of the first shown or of the second shown object, '
+                           'depending on the cue.',
+            'Units': 'Integer from 1 to 3'
         },
         'object_cue_rot': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
-        },
-        'type_of_task': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
-        },
-        'type_of_pings': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
-        },
-        'position_odd_pings': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
-        },
-        'object_test_name': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Rotation of an object cued, either rotation of the first shown or of the second shown '
+                           'object, depending on the cue.',
+            'Units': 'Degrees, clockwise, 12PM as a zero position'
         },
         'object_test_id': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'ID of an object which appeared on the screen first during memory test. Also picked '
+                           'pseudo-randomly. There are 9 objects altogether, for every participant 3 of them are '
+                           'picked pseudo-randomly for the whole experiment, the ID indicates the ID of an object in '
+                           'this picked subgroup.',
+            'Units': 'Integer from 1 to 3',
         },
         'object_test_rot': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Rotation, in which the first appeared object spawned on the screen during memory test. '
+                           'Picked pseudo-randomly.',
+            'Units': 'Degrees, clockwise, 12PM as a zero position'
         },
         'rt_resp_abstract_first_key': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Onset of the first button press by a participant. Has no value if the participant '
+                           'confirmed the item and its rotation without adjusting.',
+            'Units': 'Seconds from the beginning of the experiment'
         },
         'rt_resp_abstract': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Total respond time from memory test beginning until confirmation???',
+            'Units': 'Seconds'
         },
         'acc_ori_abstract': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Accuracy of confirmed object orientation',
+            'Units': 'Percent'
         },
         'final_rot_abstract': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Object rotation confirmed by a participant',
+            'Units': 'Degrees, clockwise, 12PM as a zero position'
         },
         'onset_object_1': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Time stamp when the first object in the trial is presented to the participant',
+            'Units': 'Seconds from the beginning of the experiment'
         },
         'onset_object_2': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Time stamp when the second item in the trial is presented to the participant',
+            'Units': 'Seconds from the beginning of the experiment'
         },
         'onset_retrocue': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
-        },
-        'onset_taskcue': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Time stamp when the audio cue is played for the participant',
+            'Units': 'Seconds from the beginning of the experiment'
         },
         'onset_test': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Time stamp when the memory test starts',
+            'Units': 'Seconds from the beginning of the experiment'
         },
         'onset_feedback': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
-        },
-        'onset_ping_10': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Time stamp when the feedback is presented to the participant',
+            'Units': 'Seconds from the beginning of the experiment'
         },
         'trigger_object_1': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'ID of the trigger corresponding to the first presented object and its rotation',
+            'Units': 'Integer from 1 to 3'
         },
         'trigger_object_2': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'ID of the trigger corresponding to the second presented object and its rotation',
+            'Units': 'Integer from 1 to 3'
         },
         'trigger_retrocue_1': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
-        },
-        'trigger_object_concrete': {
-            'LongName': '',
-            'Description': '',
+            'Description': 'ID of the trigger corresponding to the audio cue',
             'Levels': '',
         },
         'trigger_object_abstract': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
-        },
-        'ping_null_5': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': '??????'
         },
         'object_null_1': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Whether the FIXATE message appeared after the first shown object',
+            'Levels': {
+                0: 'No FIXATE message. Gaze of participant is locked on the fixation point.',
+                1: 'FIXATE message. Gaze of participant is not locked on the fixation point.'
+            }
         },
         'object_null_2': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
-        },
-        'block_repe_null': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Whether the FIXATE message appeared after the second shown object',
+            'Levels': {
+                0: 'No FIXATE message. Gaze of participant is locked on the fixation point.',
+                1: 'FIXATE message. Gaze of participant is not locked on the fixation point.'
+            }
         },
         'threshold_fix': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Threshold for a FIXATE message to appeared, sensitivity for gaze position',
+            'Units': 'Pixels???',
         },
         'object1scpos': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Position of the first shown object on the screen. The object is always a fixed distance '
+                           'away from the fixation point. There are 16 fixed equidistantly distributed positions, '
+                           'as if in 16 segments of a circle. The positions are coded with 12PM as a zero, '
+                           'clockwise direction',
+            'Units': ' Integer from 1 to 16'
         },
         'object2scpos': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
-        },
-        'objecttestscpos': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Position of the second shown object on the screen. The object is always a fixed distance '
+                           'away from the fixation point. There are 16 fixed equidistantly distributed positions, '
+                           'as if in 16 segments of a circle. The positions are coded with 12PM as a zero, '
+                           'clockwise direction',
+            'Units': ' Integer from 1 to 16'
         },
         'distractors': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Task version with or without use of distractor objects.',
+            'Levels': {
+                0: 'No distractors used.',
+                1: 'Distractors used. They will be presented before the memory test.'
+            }
         },
         'distractor_name': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Filename of an object shown as a distractor before the memory test.'
         },
         'distractor_id': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'ID of an object shown as a distractor before the memory test. There are 9 objects '
+                           'altogether, for every participant 3 of them are picked pseudo-randomly for the whole '
+                           'experiment, the ID indicates the ID of an object in this picked subgroup.',
+            'Units': 'Integer from 1 to 3'
         },
         'distractor_rot': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Rotation of an object shown as a distractor before the memory test. There are 16 fixed '
+                           'equidistantly distributed rotations, as if in 16 segments of a circle.',
+            'Units': 'Degrees, clockwise, 12PM as a zero position'
         },
         'onset_distractor': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Time stamp when the distractor item is presented to the participant',
+            'Units': 'Seconds from the beginning of the experiment'
         },
         'acc_trial_id_abstract': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'Whether the confirmed object is the same object that was to be memorized.',
+            'Levels': {
+                0: 'Incorrect object.',
+                1: 'Correct object.'
+            }
         },
         'final_id_abstract': {
-            'LongName': '',
-            'Description': '',
-            'Levels': '',
+            'Description': 'How many objects the participant observed (by pressing the DOWN button) before making a '
+                           'decision',
+            'Units': 'Integer, bigger than or equal to 1',
         },
     }
     return json
