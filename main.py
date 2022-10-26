@@ -20,16 +20,24 @@ def make_dataset_description():
         "Name": "mpib_memoreeg",  # REQUIRED
         "BIDSVersion": "1.7.0",  # REQUIRED
         "DatasetType": "raw",
-        "License": "",
+        "License": "PDDL (?)",
         "Authors": [
-            ""
+            "Juan Linde-Domingo",
+            "Bernhard Spitzer"
         ],
-        "Acknowledgements": "",
-        "HowToAcknowledge": "",
-        "Funding": "",
-        "EthicsApproval": "",
-        "ReferencesAndLinks": "",
-        "DatasetDOI": ""
+        "Acknowledgements": "We thank Anouk Bielefeldt, Anna Faschinger, Aleksandra Zinoveva and Jann Wäscher for "
+                            "help with participant management and data collection.",
+        "HowToAcknowledge": "Please cite. The reference will be here soon!",
+        "EthicsApproval": [
+            "The study was approved by the ethics committee of the Max Planck Institute for Human Development, Berlin, "
+            "Germany."
+        ],
+        "ReferencesAndLinks": [
+            "Reference One",
+            "Reference Two",
+            "Reference Three"
+        ],
+        "DatasetDOI": "Will come with the acknowledgement."
     }
     filename = op.join(BIDS_ROOT, "dataset_description.json")
     with open(filename, "w", encoding="utf-8") as fout:
@@ -66,12 +74,10 @@ def make_participants():
             }
         },
         "stimuli_set": {
-            "Description": "A predetermined set of stimuli used with a given participant",
-            "Levels": {
-                1: "",
-                2: "",
-                3: ""
-            }
+            "Description": "An ID for the set of task stimuli used with a given participant. There are 9 objects "
+                           "altogether, for every participant 3 of them are picked pseudo-randomly for the whole "
+                           "experiment, the number indicates the pseudo-random seed of this subgroup.",
+            "Units": "Integer from 1 to 3"
         },
         "distractor": {
             "Description": "Presence of a distractor stimulus with a given participant",
@@ -82,13 +88,11 @@ def make_participants():
             }
         },
         "distractor_set": {
-            "Description": "A predetermined set of distractor stimuli used with a given participant (if distractor "
-                           "used)",
-            "Levels": {
-                1: "",
-                2: "",
-                3: ""
-            }
+            "Description": "An ID for the set of distractor stimuli used with a given participant (if distractors "
+                           "used in the task). There are 9 objects altogether, for every participant 3 of them are "
+                           "picked pseudo-randomly for the whole experiment, the number indicates the pseudo-random "
+                           "seed of this subgroup.",
+            "Units": "Integer from 1 to 3"
         }
     }
     filename = op.join(BIDS_ROOT, "participants.json")
@@ -130,7 +134,7 @@ def make_bidsignore():
 
 
 def main():
-    for subject_id in SUBJECTS:
+    for subject_id in range(1, 3):
         data = data2bids.Subject(subject_id)
         data.eeg_to_bids(BIDS_ROOT)
         data.beh_to_bids(BIDS_ROOT)
