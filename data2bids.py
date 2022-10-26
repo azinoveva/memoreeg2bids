@@ -129,7 +129,7 @@ class Subject:
         # Next, let's add a JSON sidecar with description of *_events.tsv data
 
         json_path = BIDSPath(subject=self.id, task=self.task, root=bids_root, datatype='eeg', suffix='events',
-                               extension=".json")
+                             extension=".json")
         json_eeg_events = make_json.eeg_events()
         with open(json_path, 'w', encoding='utf-8') as output:
             json.dump(json_eeg_events, output, ensure_ascii=False, indent=4)
@@ -137,7 +137,7 @@ class Subject:
 
         # Last, let's update the auto-generated metadata with available information.
         json_path = BIDSPath(subject=self.id, task=self.task, root=bids_root, datatype='eeg', suffix='eeg',
-                               extension=".json")
+                             extension=".json")
         with open(json_path, 'r+') as data:
             eeg_json = json.load(data)
             eeg_json["Instructions"] = "Instructions can be found..."
@@ -154,8 +154,6 @@ class Subject:
             data.seek(0)
             json.dump(eeg_json, data, ensure_ascii=False, indent=4)
             data.truncate()
-
-
 
     def beh_to_bids(self, bids_root=BIDS_ROOT):
         """
@@ -177,22 +175,28 @@ class Subject:
         beh_data = beh_data.applymap(lambda x: str(x).replace(" ", ""))
         beh_data.columns = beh_data.columns.str.replace(" ", "")
 
+        # Drop duplicate header rows (needs to happen before checking for empty cells!)
+        beh_data = beh_data[beh_data.iloc[:, 0] != beh_data.columns[0]]
+
         # Columns to drop
-        empty_cols = [col for col in beh_data.columns if (beh_data[col].isnull().all() or beh_data[col].eq("NaN").all())]
+        empty_cols = [col for col in beh_data.columns if
+                      (beh_data[col].isnull().all() or beh_data[col].eq("NaN").all())]
 
         # Some columns already carry information from participants.tsv (e.g. age, gender...). Other columns do
         # not carry any relevant information and have been inherited through adjusting the script from previous
         # experiments.
         redundant_cols = ['task_version', 'date', 'subID', 'sub_gender', 'sub_age', 'practice', 'righthanded',
-                          'colorset_pins', 'type_of_task', 'type_of_ings', 'position_odd_pings', 'object_test_name', 'block_repe_null']
+                          'colorset_pins', 'type_of_task', 'type_of_ings', 'position_odd_pings', 'object_test_name',
+                          'block_repe_null']
 
         beh_data.drop(empty_cols + redundant_cols, axis=1, inplace=True)
 
-        # Drop duplicate header rows
-        beh_data = beh_data[beh_data.iloc[:, 0] != beh_data.columns[0]]
+        # Correct typo in column name
+        beh_data.rename(columns={'object_2_ID': 'object_2_id'})
 
         # Fill empty values
         beh_data.fillna("n/a", inplace=True)
+        beh_data = beh_data.applymap(lambda x: str(x).replace("", "n/a"))
 
         # Write cleared dataset into sub-<ID>_task-<taskname>_beh.tsv file
         beh_data.to_csv(bids_path, sep='\t', index=False)

@@ -53,21 +53,21 @@ def make_participants():
     """
     participants_json = {
         "participant_id": {
-            "Description": "Unique participant identifier"
+            "Description": "Unique participant identifier."
         },
         "age": {
-            "Description": "Age of a participant",
+            "Description": "Age of a participant.",
             "Units": "years"
         },
         "handedness": {
-            "Description": "Handedness of a participant, reported by the participant",
+            "Description": "Handedness of a participant, reported by the participant.",
             "Levels": {
-                "R": "righthanded",
-                "L": "lefthanded",
+                "R": "Right-handed",
+                "L": "Left-handed",
             }
         },
         "gender": {
-            "Description": "Gender of a participant, reported by the participant",
+            "Description": "Gender of a participant, reported by the participant.",
             "Levels": {
                 "F": "Female",
                 "M": "Male"
@@ -80,10 +80,10 @@ def make_participants():
             "Units": "Integer from 1 to 3"
         },
         "distractor": {
-            "Description": "Presence of a distractor stimulus with a given participant",
+            "Description": "Presence of a distractor stimulus with a given participant.",
             "Levels": {
-                1: "distractors have been used",
-                0: "no distractor has been used"
+                1: "Distractors have been used. Task name: distractor",
+                0: "No distractor has been used. Task name: nodistractor"
 
             }
         },

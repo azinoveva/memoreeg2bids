@@ -6,10 +6,7 @@ def eeg_events():
     json = {
         "StimulusPresentation": {
             "OperatingSystem": "Windows 10 - Version 1903",
-            "SoftwareName": "MATLAB",
-            "SoftwareRRID": "",
-            "SoftwareVersion": "",
-            "Code": "",
+            "SoftwareName": "MATLAB"
         },
         "onset": {
             "Description": "Onset of the event",
