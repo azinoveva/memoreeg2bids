@@ -1,9 +1,10 @@
 /data
-/bids
-/sub-*
+/mpib_memoreeg/sourcedata
+/mpib_memoreeg/sub-*
 /misc
 dataset_description.json
 events.json
 participants.json
 participants.tsv
 README
+.bidsignore
