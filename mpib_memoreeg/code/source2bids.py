@@ -1,45 +1,81 @@
+"""
+Following code formats source data of experiment into Brain Imaging Data Structure v1.8.0 (BIDS,
+https://bids.neuroimaging.io).
+
+BIDS standard compliance additionally tested on BIDS Validator v.1.9.9 (https://bids-standard.github.io/bids-validator/)
+
+Required dependencies:
+- mne <= 1.2.0
+- mne-bids <= 0.11
+
+The script (and two "subscripts" belonging to it, subject.py and textfiles.py) is intended to run from the
+BIDS_ROOT/code folder and expects following folder/data structure:
+
+BIDS_ROOT
+├── code
+│   └── source2bids.py
+│   └── subject.py
+│   └── textfiles.py
+└── sourcedata
+│   ├── behavioral
+│   │   ├── resultfile_p001.txt
+│   │   ...
+│   ├── eeg
+│   │   ├── p001.eeg
+│   │   ├── p001.vhdr
+│   │   ├── p001.vmrk
+│   │   ...
+│   ├── eyetracking
+│   ├── irb_data_protection
+│   └── participants_log.tsv
+...
+
+This code is lisenced under MIT (https://opensource.org/licenses/MIT)
+
+Copyright 2022 Juan Linde-Domingo, Aleksandra Zinoveva
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+# Import necessary packages
+import os
 import os.path as op
 import pandas as pd
-import json
+import urllib3
+import textfiles
+import subject as s
 
-import Subject
-
-SUBJECTS = range(1, 81)
+# Create constants for easier use
+# How many participants should be converted by MNE-BIDS?
+SUBJECTS = range(1, 5)
+# Should only annotations for the whole dataset be updated?
+UPDATE_TEXT_ONLY = False
+# Default data root for BIDS to convert into
 BIDS_ROOT = op.join(op.dirname(op.realpath(__file__)), "..")
+# Default source data root
 DATA_PATH = op.join(op.dirname(op.realpath(__file__)), "../sourcedata")
 
+# make_ functions contain very similar code to generate text annotations.
+# I put it this way for readability in main().
 
 def make_dataset_description():
     """
-    Create a description JSON for the dataset and dump it into the dataset_description.json file
+    Create a description JSON for the complete dataset and put it into the dataset_description.json file
     """
-    dataset_description_json = {
-        "Name": "mpib_memoreeg",  # REQUIRED
-        "BIDSVersion": "1.7.0",  # REQUIRED
-        "DatasetType": "raw",
-        "License": "PDDL (?)",
-        "Authors": [
-            "Juan Linde-Domingo",
-            "Bernhard Spitzer"
-        ],
-        "Acknowledgements": "We thank Anouk Bielefeldt, Anna Faschinger, Aleksandra Zinoveva and Jann Wäscher for "
-                            "help with participant management and data collection.",
-        "HowToAcknowledge": "Please cite. The reference will be here soon!",
-        "EthicsApproval": [
-            "The study was approved by the ethics committee of the Max Planck Institute for Human Development, Berlin, "
-            "Germany."
-        ],
-        "ReferencesAndLinks": [
-            "Reference One",
-            "Reference Two",
-            "Reference Three"
-        ],
-        "DatasetDOI": "Will come with the acknowledgement."
-    }
+    description = textfiles.dataset_description()
     filename = op.join(BIDS_ROOT, "dataset_description.json")
-    with open(filename, "w", encoding="utf-8") as fout:
-        json.dump(dataset_description_json, fout, ensure_ascii=False, indent=4)
-        fout.write("\n")
+    textfiles.write(description, filename)
 
 
 def make_participants():
@@ -48,57 +84,13 @@ def make_participants():
     - participants.tsv with description of participants' characteristics
     - participants.json with description of columns and their values in participants.tsv
     """
-    participants_json = {
-        "participant_id": {
-            "Description": "Unique participant identifier."
-        },
-        "age": {
-            "Description": "Age of a participant.",
-            "Units": "years"
-        },
-        "handedness": {
-            "Description": "Handedness of a participant, reported by the participant.",
-            "Levels": {
-                "R": "Right-handed",
-                "L": "Left-handed",
-            }
-        },
-        "gender": {
-            "Description": "Gender of a participant, reported by the participant.",
-            "Levels": {
-                "F": "Female",
-                "M": "Male"
-            }
-        },
-        "stimuli_set": {
-            "Description": "An ID for the set of task stimuli used with a given participant. There are 9 objects "
-                           "altogether, for every participant 3 of them are picked pseudo-randomly for the whole "
-                           "experiment, the number indicates the pseudo-random seed of this subgroup.",
-            "Units": "Integer from 1 to 3"
-        },
-        "distractor": {
-            "Description": "Presence of a distractor stimulus with a given participant.",
-            "Levels": {
-                1: "Distractors have been used. Task name: distractor",
-                0: "No distractor has been used. Task name: nodistractor"
 
-            }
-        },
-        "distractor_set": {
-            "Description": "An ID for the set of distractor stimuli used with a given participant (if distractors "
-                           "used in the task). There are 9 objects altogether, for every participant 3 of them are "
-                           "picked pseudo-randomly for the whole experiment, the number indicates the pseudo-random "
-                           "seed of this subgroup.",
-            "Units": "Integer from 1 to 3"
-        }
-    }
+    # Create participants.tsv with accompanying participants.json
     filename = op.join(BIDS_ROOT, "participants.json")
-    with open(filename, "w", encoding="utf-8") as fout:
-        json.dump(participants_json, fout, ensure_ascii=False, indent=4)
-        fout.write("\n")
+    textfiles.write(textfiles.participants(), filename)
 
     # Take data from the log
-    participants = pd.read_csv('sourcedata/participants_log.tsv', sep='\t')
+    participants = pd.read_csv('../sourcedata/participants_log.tsv', sep='\t')
 
     # Map handedness information from 0/1 to L/R
     participants['Righthanded (1=yes, 0=no)'].replace({0: 'L', 1: 'R'}, inplace=True)
@@ -109,7 +101,7 @@ def make_participants():
     participants = participants[participants.Parti_ID.str.match(id_pattern)]
 
     # add BIDS-formatted ID and rename columns
-    participants['participant_id'] = [f'sub-{sub:02}' for sub in SUBJECTS]
+    participants['participant_id'] = [f'sub-{sub:02}' for sub in range(1, 81)]
     participants = participants.rename(
         columns={'Age': 'age', 'Righthanded (1=yes, 0=no)': 'handedness', 'Gender': 'gender',
                  'Stimuli_set': 'stimuli_set', 'Distractor (yes=1 no=0)': 'distractor',
@@ -123,21 +115,56 @@ def make_participants():
 
 
 def make_bidsignore():
-    text = """README.md"""
-
+    """
+    Create a .bidsignore file for BIDS-validator
+    """
+    bidsignore = textfiles.bidsignore()
     filename = op.join(BIDS_ROOT, ".bidsignore")
-    with open(filename, 'w', encoding='utf-8') as output:
-        output.write(text)
+    textfiles.write(bidsignore, filename)
+
+
+def make_readme():
+    """
+    Create a README markdown file with description of the dataset.
+    """
+    filename = op.join(BIDS_ROOT, "README.md")
+    with open(filename, "w") as fout:
+        fout.write(textfiles.readme())
+
+    # Remove automatically generated README (from mne-bids, so will be only generated if subject data is updated)
+    if not UPDATE_TEXT_ONLY:
+        os.remove(op.join(BIDS_ROOT, "README"))
+
+
+def make_license():
+    """
+    Pull PDDL license description into LICENSE.txt (thanks for this one, Stefan ;) )
+    """
+    lic_text_url = "https://opendatacommons.org/licenses/pddl/pddl-10.txt"
+    http = urllib3.PoolManager()
+    req = http.request("GET", lic_text_url)
+    assert req.status == 200
+    license_str = req.data.decode("utf-8")
+
+    filename = op.join(BIDS_ROOT, "LICENSE.txt")
+    with open(filename, "w") as output:
+        output.write(license_str)
 
 
 def main():
-    for subject_id in range(1, 3):
-        data = Subject.Subject(subject_id)
-        data.eeg_to_bids(BIDS_ROOT)
-        data.beh_to_bids(BIDS_ROOT)
+    # There is an option to not just update text files but also convert source data anew with MNE-BIDS tool.
+    if not UPDATE_TEXT_ONLY:
+        for sub_id in SUBJECTS:
+            data = s.Subject(sub_id)
+            data.eeg_to_bids(BIDS_ROOT)
+            data.beh_to_bids(BIDS_ROOT)
+
+    # Quite self-explanatory. Creates all the annotations for the complete dataset.
     make_dataset_description()
     make_participants()
     make_bidsignore()
+    make_readme()
+    make_license()
 
 
 if __name__ == '__main__':
