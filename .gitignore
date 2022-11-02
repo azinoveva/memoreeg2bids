@@ -8,6 +8,7 @@ events.json
 participants.json
 participants.tsv
 /mpib_memoreeg/README.md
-LICENSE.txt
+/mpib_memoreeg/CHANGES.txt
+/mpib_memoreeg/LICENSE.txt
 .bidsignore
 .bids-validator-config.json

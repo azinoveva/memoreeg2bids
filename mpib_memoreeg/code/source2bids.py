@@ -141,6 +141,15 @@ def make_readme():
         os.remove(op.join(BIDS_ROOT, "README"))
 
 
+def make_changes():
+    """
+    Create a CHANGES file.
+    """
+    filename = op.join(BIDS_ROOT, "CHANGES.txt")
+    with open(filename, "w") as fout:
+        fout.write(textfiles.changes())
+
+
 def make_license():
     """
     Pull PDDL license description into LICENSE.txt (thanks for this one, Stefan ;) )
@@ -200,6 +209,7 @@ def main():
     make_bids_validator_config()
     make_readme()
     make_license()
+    make_changes()
 
 
 if __name__ == '__main__':

@@ -376,6 +376,10 @@ def participants():
 
 
 def dataset_description():
+    """
+    Generates a dataset_description JSON
+    :return: JSON sidecar with dataset description
+    """
     contents = {
         "Name": "mpib_memoreeg",  # REQUIRED
         "BIDSVersion": "1.8.0",  # REQUIRED
@@ -404,6 +408,9 @@ def dataset_description():
 
 
 def bidsignore():
+    """
+    Generates contents of .bidsignore file
+    """
     contents = """README.md
 LICENSE.txt
     """
@@ -411,6 +418,9 @@ LICENSE.txt
 
 
 def readme():
+    """
+    Generates contents of README.md file
+    """
     contents = """# README: mpib_memoreeg DATASET (BIDS)
     
 This dataset contains raw data of the MemorEEG experiment conducted at the Max Planck Institute for Human 
@@ -548,6 +558,16 @@ EEG-BIDS, an extension to the brain imaging data structure for electroencephalog
 > Niso, G., Gorgolewski, K. J., Bock, E., Brooks, T. L., Flandin, G., Gramfort, A., Henson, R. N., Jas, M., Litvak, 
 V., Moreau, J., Oostenveld, R., Schoffelen, J., Tadel, F., Wexler, J., Baillet, S. (2018). MEG-BIDS, 
 the brain imaging data structure extended to magnetoencephalography. Scientific Data, 5, 180110. https://doi.org/10.1038/sdata.2018.110  """
+    return contents
+
+
+def changes():
+    """
+    Generates contents of CHANGES.txt file
+    """
+    contents = """0.01 2022-11-02
+    - Initial release
+    """
     return contents
 
 
