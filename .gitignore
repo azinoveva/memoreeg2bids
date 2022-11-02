@@ -1,6 +1,7 @@
 /data
 /mpib_memoreeg/sourcedata
 /mpib_memoreeg/sub-*
+/mpib_memoreeg/stimuli
 /misc
 dataset_description.json
 events.json
@@ -9,3 +10,4 @@ participants.tsv
 README.md
 LICENSE.txt
 .bidsignore
+.bids-validator-config.json

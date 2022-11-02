@@ -53,8 +53,7 @@ import json
 # Import necessary packages
 import os
 import os.path as op
-import shutil
-
+from distutils.dir_util import copy_tree
 import pandas as pd
 import urllib3
 import textfiles
@@ -125,7 +124,8 @@ def make_bidsignore():
     """
     bidsignore = textfiles.bidsignore()
     filename = op.join(BIDS_ROOT, ".bidsignore")
-    textfiles.write(bidsignore, filename)
+    with open(filename, "w") as output:
+        output.write(bidsignore)
 
 
 def make_readme():
@@ -161,10 +161,13 @@ def make_bids_validator_config():
     Make a .bidsconfig.json file. (thanks for this one, Stefan ;) )
     """
     # As stated in README, one subject is always assigned one type of task. Therefore, inconsistency.
+    # README.txt is also replaced by a Markdown file. The warning can be ignored.
     bids_validator_config_json = {
         "ignore": [
-            38,  # [WARN] Not all subjects contain the same files. Each subject should contain the same number of
+            38,   # [WARN] Not all subjects contain the same files. Each subject should contain the same number of
             # files with the same naming unless some files are known to be missing. (code: 38 - INCONSISTENT_SUBJECTS)
+            101,  # [WARN] The recommended file /README is missing. See Section 03 (Modality agnostic files) of the
+            # BIDS specification. (code: 101 - README_FILE_MISSING)
         ]}
     filename = op.join(BIDS_ROOT, ".bids-validator-config.json")
     textfiles.write(bids_validator_config_json, filename)
@@ -179,7 +182,7 @@ def main():
             data.beh_to_bids(BIDS_ROOT)
 
         # Copy stimuli from sourcedata
-        shutil.copy(op.join(DATA_PATH, "stimuli"), op.join(BIDS_ROOT, "stimuli"))
+        copy_tree(op.join(DATA_PATH, "stimuli"), op.join(BIDS_ROOT, "stimuli"))
 
     # Quite self-explanatory. Creates all the annotations for the complete dataset.
     make_dataset_description()

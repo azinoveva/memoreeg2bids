@@ -404,7 +404,9 @@ def dataset_description():
 
 
 def bidsignore():
-    contents = """README.md"""
+    contents = """README.md
+LICENSE.txt
+    """
     return contents
 
 
