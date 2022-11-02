@@ -25,6 +25,7 @@ BIDS_ROOT
 │   │   ├── p001.vhdr
 │   │   ├── p001.vmrk
 │   │   ...
+│   ├── stimuli
 │   ├── eyetracking
 │   ├── irb_data_protection
 │   └── participants_log.tsv
@@ -48,9 +49,12 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import json
 # Import necessary packages
 import os
 import os.path as op
+import shutil
+
 import pandas as pd
 import urllib3
 import textfiles
@@ -65,6 +69,7 @@ UPDATE_TEXT_ONLY = False
 BIDS_ROOT = op.join(op.dirname(op.realpath(__file__)), "..")
 # Default source data root
 DATA_PATH = op.join(op.dirname(op.realpath(__file__)), "../sourcedata")
+
 
 # make_ functions contain very similar code to generate text annotations.
 # I put it this way for readability in main().
@@ -151,6 +156,20 @@ def make_license():
         output.write(license_str)
 
 
+def make_bids_validator_config():
+    """
+    Make a .bidsconfig.json file. (thanks for this one, Stefan ;) )
+    """
+    # As stated in README, one subject is always assigned one type of task. Therefore, inconsistency.
+    bids_validator_config_json = {
+        "ignore": [
+            38,  # [WARN] Not all subjects contain the same files. Each subject should contain the same number of
+            # files with the same naming unless some files are known to be missing. (code: 38 - INCONSISTENT_SUBJECTS)
+        ]}
+    filename = op.join(BIDS_ROOT, ".bids-validator-config.json")
+    textfiles.write(bids_validator_config_json, filename)
+
+
 def main():
     # There is an option to not just update text files but also convert source data anew with MNE-BIDS tool.
     if not UPDATE_TEXT_ONLY:
@@ -158,6 +177,9 @@ def main():
             data = s.Subject(sub_id)
             data.eeg_to_bids(BIDS_ROOT)
             data.beh_to_bids(BIDS_ROOT)
+
+        # Copy stimuli from sourcedata
+        shutil.copy(op.join(DATA_PATH, "stimuli"), op.join(BIDS_ROOT, "stimuli"))
 
     # Quite self-explanatory. Creates all the annotations for the complete dataset.
     make_dataset_description()
