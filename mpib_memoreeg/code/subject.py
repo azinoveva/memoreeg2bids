@@ -2,7 +2,7 @@
 Following code formats collected EEG and behavioral data for every subject into BIDS-compatible format. This file
 is NECESSARY to successfully execute source2bids.py.
 
-This code is lisenced under MIT (https://opensource.org/licenses/MIT)
+This code is licensed under MIT (https://opensource.org/licenses/MIT)
 
 Copyright 2022 Juan Linde-Domingo, Aleksandra Zinoveva
 

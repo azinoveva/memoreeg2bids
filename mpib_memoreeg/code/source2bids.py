@@ -31,7 +31,7 @@ BIDS_ROOT
 │   └── participants_log.tsv
 ...
 
-This code is lisenced under MIT (https://opensource.org/licenses/MIT)
+This code is licensed under MIT (https://opensource.org/licenses/MIT)
 
 Copyright 2022 Juan Linde-Domingo, Aleksandra Zinoveva
 

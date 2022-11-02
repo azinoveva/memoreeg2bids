@@ -2,7 +2,7 @@
 Following code manages annotations for mpib_memoreeg BIDS dataset and contains editable text information in form of
 JSON, README, etc. This file is NECESSARY to successfully execute source2bids.py.
 
-This code is lisenced under MIT (https://opensource.org/licenses/MIT)
+This code is licensed under MIT (https://opensource.org/licenses/MIT)
 
 Copyright 2022 Juan Linde-Domingo, Aleksandra Zinoveva
 
