@@ -185,6 +185,7 @@ def main():
     make_dataset_description()
     make_participants()
     make_bidsignore()
+    make_bids_validator_config()
     make_readme()
     make_license()
 
