@@ -7,7 +7,7 @@ dataset_description.json
 events.json
 participants.json
 participants.tsv
-README.md
+/mpib_memoreeg/README.md
 LICENSE.txt
 .bidsignore
 .bids-validator-config.json
