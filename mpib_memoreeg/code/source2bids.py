@@ -145,7 +145,7 @@ def make_changes():
     """
     Create a CHANGES file.
     """
-    filename = op.join(BIDS_ROOT, "CHANGES.txt")
+    filename = op.join(BIDS_ROOT, "CHANGES")
     with open(filename, "w") as fout:
         fout.write(textfiles.changes())
 
@@ -160,7 +160,7 @@ def make_license():
     assert req.status == 200
     license_str = req.data.decode("utf-8")
 
-    filename = op.join(BIDS_ROOT, "LICENSE.txt")
+    filename = op.join(BIDS_ROOT, "LICENSE")
     with open(filename, "w") as output:
         output.write(license_str)
 

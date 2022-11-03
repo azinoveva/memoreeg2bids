@@ -319,7 +319,6 @@ def behavioral(task):
         },
     }
 
-
     return contents
 
 
@@ -552,18 +551,23 @@ Collected eye tracking data can be found in the [sourcedata/eyetracking](./sourc
 
 ## Acknowledgements
 
+> Brodeur, M. B., Guérard, K., Bouras, M. (2014). Bank of Standardized Stimuli (BOSS) Phase II: 930 New Normative 
+Photos. PLOS ONE 9(9): e106953. https://doi.org/10.1371/journal.pone.0106953 
+
 > Pernet, C. R., Appelhoff, S., Gorgolewski, K. J., Flandin, G., Phillips, C., Delorme, A., Oostenveld, R. (2019). 
-EEG-BIDS, an extension to the brain imaging data structure for electroencephalography. Scientific Data, 6, 103. https://doi.org/10.1038/s41597-019-0104-8 
+EEG-BIDS, an extension to the brain imaging data structure for electroencephalography. Scientific Data, 6, 
+103. https://doi.org/10.1038/s41597-019-0104-8 
 
 > Niso, G., Gorgolewski, K. J., Bock, E., Brooks, T. L., Flandin, G., Gramfort, A., Henson, R. N., Jas, M., Litvak, 
 V., Moreau, J., Oostenveld, R., Schoffelen, J., Tadel, F., Wexler, J., Baillet, S. (2018). MEG-BIDS, 
-the brain imaging data structure extended to magnetoencephalography. Scientific Data, 5, 180110. https://doi.org/10.1038/sdata.2018.110  """
+the brain imaging data structure extended to magnetoencephalography. Scientific Data, 5, 
+180110. https://doi.org/10.1038/sdata.2018.110 """
     return contents
 
 
 def changes():
     """
-    Generates contents of CHANGES.txt file
+    Generates contents of CHANGES file
     """
     contents = """0.01 2022-11-02
     - Initial release
