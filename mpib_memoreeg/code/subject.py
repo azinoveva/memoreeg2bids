@@ -37,8 +37,8 @@ BIDS_ROOT = op.join(op.dirname(op.realpath(__file__)), "..")
 def get_object_type(stimulus):
     """
     Helper function to determine type of stimulus from its trigger ID.
-    :param stimulus: (int) Stimulus ID
-    :return: (str) Stimulus description in words
+    :param int stimulus: Stimulus ID
+    :return str: Stimulus description in words
     """
     match stimulus:
         case stimulus if stimulus in range(1, 17):
@@ -82,7 +82,7 @@ class Subject:
     def __init__(self, subject_id, data_path=DATA_PATH):
         """
         Construct necessary subject data.
-        :param subject_id: (int) ID of the experiment participant
+        :param int subject_id: ID of the experiment participant
         """
         # Create a BIDS-ID for the subject (format: sub-XX)
         self.id = f'{subject_id:02}'
@@ -100,7 +100,7 @@ class Subject:
         """
         Expand the collected BrainVision data into BIDS-compliant structure.
         Per default, the data will be expanded into home directory of the script
-        :param bids_root: New location of the data
+        :param str bids_root: New location of the data
         """
         # First, let's find and read the source EEG data
         raw = mne.io.read_raw_brainvision(self.vhdr_path)

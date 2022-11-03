@@ -49,7 +49,6 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import json
 # Import necessary packages
 import os
 import os.path as op
@@ -172,8 +171,6 @@ def make_bids_validator_config():
     # 38: As stated in README, one subject is always assigned one type of task. Therefore, BIDS validator will always
     # treat one of the missing task types as inconsistency.
     #
-    # 101: README.txt is also replaced by a Markdown file. The warning can be ignored.
-    #
     # 77: Due to nature of stimulus sampling and trigger description it is not always possible to easily identify,
     # which stimulus in EEG recording corresponds to which trigger ID. However, the behavioral event files contain
     # this information in a form of multiple presented stimuli per one single trial. I'll ignore the warning first
@@ -182,8 +179,6 @@ def make_bids_validator_config():
         "ignore": [
             38,   # [WARN] Not all subjects contain the same files. Each subject should contain the same number of
             # files with the same naming unless some files are known to be missing. (code: 38 - INCONSISTENT_SUBJECTS)
-            101,  # [WARN] The recommended file /README is missing. See Section 03 (Modality agnostic files) of the
-            # BIDS specification. (code: 101 - README_FILE_MISSING)
             77,   # [WARN] There are files in the /stimuli directory that are not utilized in any _events.tsv file.
             # (code: 77 - UNUSED_STIMULUS)
         ]}

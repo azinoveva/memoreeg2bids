@@ -410,9 +410,8 @@ def bidsignore():
     """
     Generates contents of .bidsignore file
     """
-    contents = """README.md
-LICENSE.txt
-    """
+    contents = """
+"""
     return contents
 
 
@@ -551,17 +550,14 @@ Collected eye tracking data can be found in the [sourcedata/eyetracking](./sourc
 
 ## Acknowledgements
 
+> Appelhoff et al., (2019). MNE-BIDS: Organizing electrophysiological data into the BIDS format and facilitating 
+their analysis. Journal of Open Source Software, 4(44), 1896, https://doi.org/10.21105/joss.01896 
+
 > Brodeur, M. B., Guérard, K., Bouras, M. (2014). Bank of Standardized Stimuli (BOSS) Phase II: 930 New Normative 
-Photos. PLOS ONE 9(9): e106953. https://doi.org/10.1371/journal.pone.0106953 
+Photos. PLOS ONE 9(9): e106953. https://doi.org/10.1371/journal.pone.0106953
 
-> Pernet, C. R., Appelhoff, S., Gorgolewski, K. J., Flandin, G., Phillips, C., Delorme, A., Oostenveld, R. (2019). 
-EEG-BIDS, an extension to the brain imaging data structure for electroencephalography. Scientific Data, 6, 
-103. https://doi.org/10.1038/s41597-019-0104-8 
-
-> Niso, G., Gorgolewski, K. J., Bock, E., Brooks, T. L., Flandin, G., Gramfort, A., Henson, R. N., Jas, M., Litvak, 
-V., Moreau, J., Oostenveld, R., Schoffelen, J., Tadel, F., Wexler, J., Baillet, S. (2018). MEG-BIDS, 
-the brain imaging data structure extended to magnetoencephalography. Scientific Data, 5, 
-180110. https://doi.org/10.1038/sdata.2018.110 """
+> Gorgolewski, K., Auer, T., Calhoun, V. et al. The brain imaging data structure, a format for organizing and 
+describing outputs of neuroimaging experiments. Sci Data 3, 160044 (2016). https://doi.org/10.1038/sdata.2016.44 """
     return contents
 
 
