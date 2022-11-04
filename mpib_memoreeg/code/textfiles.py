@@ -75,14 +75,9 @@ def eeg_events():
             "Description": "Short description of marked event",
             "Levels": {
                 "begin/end": "Beginning or end of one experiment session",
-                "encoding-1": "Encoding item #1 is shown",
-                "encoding-2": "Encoding item #2 is shown",
-                "encoding-3": "Encoding item #3 is shown",
-                "distractor-1": "Distractor item #1 is shown",
-                "distractor-2": "Distractor item #2 is shown",
-                "distractor-3": "Distractor item #3 is shown",
-                "retrocue-1": "Participant hears a cue to remember the first shown encoding item",
-                "retrocue-2": "Participant hears a cue to remember the second shown encoding item",
+                "encoding": "Encoding item is shown",
+                "distractor": "Distractor item #1 is shown",
+                "retrocue": "Participant hears a cue to remember one of the shown encoding items",
                 "down": "Participant presses ARROW DOWN to change the item's ID",
                 "left": "Participant presses ARROW LEFT to rotate the item counter-clockwise",
                 "right": "Participant presses ARROW RIGHT to rotate the item clockwise",
@@ -279,13 +274,6 @@ def behavioral(task):
                            'as if in 16 segments of a circle. The positions are coded with 12PM as a zero, '
                            'clockwise direction',
             'Units': ' Integer from 1 to 16'
-        },
-        'distractors': {
-            'Description': 'Task version with or without use of distractor objects.',
-            'Levels': {
-                0: 'No distractors used.',
-                1: 'Distractors used. They will be presented before the memory test.'
-            }
         },
         'distractor_name': {
             'Description': 'Filename of an object shown as a distractor before the memory test.'

@@ -34,56 +34,19 @@ DATA_PATH = op.join(op.dirname(op.realpath(__file__)), "../sourcedata")
 BIDS_ROOT = op.join(op.dirname(op.realpath(__file__)), "..")
 
 
-def get_object_type(stimulus):
-    """
-    Helper function to determine type of stimulus from its trigger ID.
-    :param int stimulus: Stimulus ID
-    :return str: Stimulus description in words
-    """
-    match stimulus:
-        case stimulus if stimulus in range(1, 17):
-            return 'encoding-1'
-        case stimulus if stimulus in range(21, 37):
-            return 'encoding-2'
-        case stimulus if stimulus in range(41, 57):
-            return 'encoding-3'
-        case stimulus if stimulus in range(101, 117):
-            return 'distractor-1'
-        case stimulus if stimulus in range(121, 137):
-            return 'distractor-2'
-        case stimulus if stimulus in range(141, 157):
-            return 'distractor-3'
-        case stimulus if stimulus in range(201, 217):
-            return 'position'
-        case 221:
-            return 'retrocue-1'
-        case 222:
-            return 'retrocue-2'
-        case 240:
-            return 'left'
-        case 241:
-            return 'right'
-        case 242:
-            return 'down'
-        case 243:
-            return 'up'
-        case 244:
-            return 'feedback'
-        case 245:
-            return 'begin/end'
-        case _:
-            return 'n/a'
-
-
 class Subject:
     """
     Class represents key data parameters for a single participant and allows for easier formatting.
     """
     # Stimulus matrix determines how stimulus IDs are assigned during the trials. E.g., STIM_MAT[1,2] contains
     # filename for 3rd stimulus in the 2nd subset (python iteration from 0)
-    STIM_MAT = [['01_lighthouse.jpg', '02_radio03.jpg', '02_table03.jpg'],
-                ['01_candelabra.jpg', '01_outdoorchair.jpg', '02_crown.jpg'],
-                ['01_lamppost01.jpg', '01_nightstand.jpg', '02_gazeboredone.jpg']]
+    _STIM_MAT = [['01_lighthouse.jpg', '02_radio03a.jpg', '02_table03.jpg'],
+                 ['01_candelabra.jpg', '01_outdoorchair.jpg', '02_crown.jpg'],
+                 ['01_lamppost01.jpg', '01_nightstand.jpg', '02_gazeboredone.jpg']]
+
+    @property
+    def STIM_MAT(self):
+        return self._STIM_MAT
 
     def __init__(self, subject_id, age, sex, hand, stimuli, distractors, data_path=DATA_PATH):
         """
@@ -109,6 +72,66 @@ class Subject:
         self.vhdr_path = op.join(data_path, f'eeg/p0{self.id}.vhdr')
         self.beh_path = op.join(data_path, f"behavioral/resultfile_p0{self.id}.txt")
 
+    def get_event_type(self, stimulus):
+        """
+        Helper function to determine type of stimulus from its trigger ID.
+        :param int stimulus: Stimulus ID
+        :return str: Stimulus description in words
+        """
+        match stimulus:
+            case stimulus if stimulus in range(1, 57):
+                return 'encoding'
+            case stimulus if stimulus in range(101, 157):
+                return 'distractor'
+            case stimulus if stimulus in range(201, 217):
+                return 'position'
+            case stimulus if stimulus in range(221, 223):
+                return 'retrocue'
+            case 240:
+                return 'left'
+            case 241:
+                return 'right'
+            case 242:
+                return 'down'
+            case 243:
+                return 'up'
+            case 244:
+                return 'feedback'
+            case 245:
+                return 'begin/end'
+            case _:
+                return 'n/a'
+
+    def get_stim_file(self, stimulus):
+        """
+
+        :param stimulus:
+        :return:
+        """
+        match stimulus:
+
+            case stimulus if stimulus in range(1, 17):
+                return self.STIM_MAT[self.stimuli - 1][0]
+            case stimulus if stimulus in range(21, 37):
+                return self.STIM_MAT[self.stimuli - 1][1]
+            case stimulus if stimulus in range(41, 57):
+                return self.STIM_MAT[self.stimuli - 1][2]
+            case stimulus if stimulus in range(101, 117) and self.distractors:
+                return self.STIM_MAT[self.distractors - 1][0]
+            case stimulus if stimulus in range(121, 137) and self.distractors:
+                return self.STIM_MAT[self.distractors - 1][1]
+            case stimulus if stimulus in range(141, 157) and self.distractors:
+                return self.STIM_MAT[self.distractors - 1][2]
+            case 221:
+                return 'Two_F3_350.wav'
+            case 222:
+                return 'One_F3_350.wav'
+            case 245:
+                return 'test.wav'
+            case _:
+                return 'n/a'
+
+
     def eeg_to_bids(self, bids_root=BIDS_ROOT):
         """
         Expand the collected BrainVision data into BIDS-compliant structure.
@@ -121,9 +144,6 @@ class Subject:
         # Add known metadata
         raw = raw.set_channel_types({"ECG": "ecg", "HEOG": "eog", "VEOG": "eog"})
         raw.info["line_freq"] = 50
-        raw.info["subject_info"] = {'id': self.id,
-                                    'sex': {'M': 1, 'F': 2}[self.sex],
-                                    'hand': {'R': 1, 'L': 2}[self.hand]}
 
         # Use mne-bids to expand the existing data
         bids_path = BIDSPath(subject=self.id, task=self.task, root=bids_root)
@@ -146,7 +166,8 @@ class Subject:
         # Take the last 3 symbols of event comments and transform them to event codes
         events['trial'] = events['trial'].transform(lambda string: int(string[-3:]))
         # Define event type using event code
-        events['event'] = events['trial'].transform(lambda stimulus: get_object_type(stimulus))
+        events['event'] = events['trial'].transform(lambda stimulus: self.get_event_type(stimulus))
+        events['stim_file'] = events['trial'].transform(lambda stimulus: self.get_stim_file(stimulus))
         # Add object rotation if exists
         events['rotation'] = events['trial'].transform(
             lambda stimulus: 'n/a' if (stimulus > 156) else (stimulus % 20 - 1) * 22.5 + 11.25)
@@ -164,7 +185,7 @@ class Subject:
         events = events[events.event != 'position']
 
         # Let's write the new dataframe to _events.tsv
-        events[['onset', 'duration', 'trial', 'sample', 'event', 'rotation', 'position']].to_csv(
+        events[['onset', 'duration', 'trial', 'sample', 'stim_file', 'event', 'rotation', 'position']].to_csv(
             events_path, index=False, na_rep="n/a", sep="\t")
 
         # Next, let's add a JSON sidecar with description of *_events.tsv data
@@ -226,10 +247,10 @@ class Subject:
         # experiments.
         redundant_cols = ['task_version', 'date', 'subID', 'sub_gender', 'sub_age', 'practice', 'righthanded',
                           'colorset_pins', 'type_of_task', 'type_of_ings', 'position_odd_pings', 'object_test_name',
-                          'block_repe_null']
+                          'block_repe_null', 'distractors']
 
-        # if not self.distractors:
-        #    redundant_cols += []
+        if not self.distractors:
+            redundant_cols += ['distractor_name', 'distractor_id', 'distractor_rot', 'onset_distractor']
 
         beh_data.drop(empty_cols + redundant_cols, axis=1, inplace=True)
 

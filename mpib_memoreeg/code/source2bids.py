@@ -53,8 +53,6 @@ SOFTWARE.
 import os
 import os.path as op
 from distutils.dir_util import copy_tree
-
-import numpy as np
 import pandas as pd
 import urllib3
 import textfiles
@@ -125,7 +123,7 @@ def make_changes():
 
 def make_license():
     """
-    Pull PDDL license description into LICENSE.txt (thanks for this one, Stefan ;) )
+    Pull PDDL license description into LICENSE.
     """
     lic_text_url = "https://opendatacommons.org/licenses/pddl/pddl-10.txt"
     http = urllib3.PoolManager()
@@ -140,21 +138,14 @@ def make_license():
 
 def make_bids_validator_config():
     """
-    Make a .bidsconfig.json file. (thanks for this one, Stefan ;) )
+    Make a .bidsconfig.json file.
     """
     # 38: As stated in README, one subject is always assigned one type of task. Therefore, BIDS validator will always
     # treat one of the missing task types as inconsistency.
-    #
-    # 77: Due to nature of stimulus sampling and trigger description it is not always possible to easily identify,
-    # which stimulus in EEG recording corresponds to which trigger ID. However, the behavioral event files contain
-    # this information in a form of multiple presented stimuli per one single trial. I'll ignore the warning first
-    # without linking stimuli to events.
     bids_validator_config_json = {
         "ignore": [
-            38,   # [WARN] Not all subjects contain the same files. Each subject should contain the same number of
+            38  # [WARN] Not all subjects contain the same files. Each subject should contain the same number of
             # files with the same naming unless some files are known to be missing. (code: 38 - INCONSISTENT_SUBJECTS)
-            77,   # [WARN] There are files in the /stimuli directory that are not utilized in any _events.tsv file.
-            # (code: 77 - UNUSED_STIMULUS)
         ]}
     filename = op.join(BIDS_ROOT, ".bids-validator-config.json")
     textfiles.write(bids_validator_config_json, filename)
@@ -183,14 +174,14 @@ def main():
     # There is an option to not just update text files but also convert source data anew with MNE-BIDS tool.
     for sub_id in SUBJECTS:
 
-        participant_data = log.iloc[sub_id]
+        participant_data = log.iloc[sub_id - 1]
 
         age = participant_data['Age']
         hand = participant_data['Righthanded (1=yes, 0=no)']
         sex = participant_data['Gender']
         stimuli_set = participant_data['Stimuli_set']
         distractor = participant_data['Distractor (yes=1 no=0)']
-        if distractor:
+        if distractor == 1:
             distractor_set = participant_data['Distractor_set']
         else:
             distractor_set = None
