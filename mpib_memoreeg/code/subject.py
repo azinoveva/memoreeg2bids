@@ -39,7 +39,8 @@ class Subject:
     Class represents key data parameters for a single participant and allows for easier formatting.
     """
     # Stimulus matrix determines how stimulus IDs are assigned during the trials. E.g., STIM_MAT[1,2] contains
-    # filename for 3rd stimulus in the 2nd subset (python iteration from 0)
+    # filename for 3rd stimulus in the 2nd subset (python iteration from 0).
+    # I also needed to reverse-engineer this one, so I'll protect it at all costs :)
     _STIM_MAT = [['01_lighthouse.jpg', '02_radio03a.jpg', '02_table03.jpg'],
                  ['01_candelabra.jpg', '01_outdoorchair.jpg', '02_crown.jpg'],
                  ['01_lamppost01.jpg', '01_nightstand.jpg', '02_gazeboredone.jpg']]
@@ -50,8 +51,14 @@ class Subject:
 
     def __init__(self, subject_id, age, sex, hand, stimuli, distractors, data_path=DATA_PATH):
         """
-        Construct necessary subject data.
-        :param int subject_id: ID of the experiment participant
+        Construct Subject class instance with given data
+        :param int subject_id: Numerical ID of a subject
+        :param int age: Age of a subject in years
+        :param str sex: Gender of a subject (F/M)
+        :param str hand: Dominating hand of a subject. (L/R)
+        :param int stimuli: Chosen stimuli subset, number from 1 to 3
+        :param int distractors: Chosen distractors subset, number from 1 to 3. Can be None if no distractors are used
+        :param str data_path: Root folder with source data. See code/README for more
         """
         # Create a BIDS-ID for the subject (format: sub-XX)
         self.id = f'{subject_id:02}'
@@ -72,20 +79,20 @@ class Subject:
         self.vhdr_path = op.join(data_path, f'eeg/p0{self.id}.vhdr')
         self.beh_path = op.join(data_path, f"behavioral/resultfile_p0{self.id}.txt")
 
-    def get_event_type(self, stimulus):
+    def get_event_type(self, trigger_id):
         """
-        Helper function to determine type of stimulus from its trigger ID.
-        :param int stimulus: Stimulus ID
-        :return str: Stimulus description in words
+        Helper function to determine type of event from its trigger ID
+        :param int trigger_id: Trigger ID, ranges from 1 to 245
+        :return str: Event description as a word
         """
-        match stimulus:
-            case stimulus if stimulus in range(1, 57):
+        match trigger_id:
+            case trigger_id if trigger_id in range(1, 57):
                 return 'encoding'
-            case stimulus if stimulus in range(101, 157):
+            case trigger_id if trigger_id in range(101, 157):
                 return 'distractor'
-            case stimulus if stimulus in range(201, 217):
+            case trigger_id if trigger_id in range(201, 217):
                 return 'position'
-            case stimulus if stimulus in range(221, 223):
+            case trigger_id if trigger_id in range(221, 223):
                 return 'retrocue'
             case 240:
                 return 'left'
@@ -102,25 +109,24 @@ class Subject:
             case _:
                 return 'n/a'
 
-    def get_stim_file(self, stimulus):
+    def get_stim_file(self, trigger_id):
         """
-
-        :param stimulus:
-        :return:
+        Helper function to determine shown/played stimulus file from its trigger ID. Look at STIM_MAT above for more
+        :param int trigger_id: Trigger ID, ranges from 1 to 245
+        :return str: Filename of shown/played stimulus
         """
-        match stimulus:
-
-            case stimulus if stimulus in range(1, 17):
+        match trigger_id:
+            case trigger_id if trigger_id in range(1, 17):
                 return self.STIM_MAT[self.stimuli - 1][0]
-            case stimulus if stimulus in range(21, 37):
+            case trigger_id if trigger_id in range(21, 37):
                 return self.STIM_MAT[self.stimuli - 1][1]
-            case stimulus if stimulus in range(41, 57):
+            case trigger_id if trigger_id in range(41, 57):
                 return self.STIM_MAT[self.stimuli - 1][2]
-            case stimulus if stimulus in range(101, 117) and self.distractors:
+            case trigger_id if trigger_id in range(101, 117) and self.distractors:
                 return self.STIM_MAT[self.distractors - 1][0]
-            case stimulus if stimulus in range(121, 137) and self.distractors:
+            case trigger_id if trigger_id in range(121, 137) and self.distractors:
                 return self.STIM_MAT[self.distractors - 1][1]
-            case stimulus if stimulus in range(141, 157) and self.distractors:
+            case trigger_id if trigger_id in range(141, 157) and self.distractors:
                 return self.STIM_MAT[self.distractors - 1][2]
             case 221:
                 return 'Two_F3_350.wav'
@@ -167,6 +173,7 @@ class Subject:
         events['trial'] = events['trial'].transform(lambda string: int(string[-3:]))
         # Define event type using event code
         events['event'] = events['trial'].transform(lambda stimulus: self.get_event_type(stimulus))
+        # Determine stimulus file using event code
         events['stim_file'] = events['trial'].transform(lambda stimulus: self.get_stim_file(stimulus))
         # Add object rotation if exists
         events['rotation'] = events['trial'].transform(
@@ -249,6 +256,8 @@ class Subject:
                           'colorset_pins', 'type_of_task', 'type_of_ings', 'position_odd_pings', 'object_test_name',
                           'block_repe_null', 'distractors']
 
+        # For tasks without distractor, the would-be distractor values are still recorded. They do not carry
+        # any valuable information and can be removed.
         if not self.distractors:
             redundant_cols += ['distractor_name', 'distractor_id', 'distractor_rot', 'onset_distractor']
 
@@ -274,7 +283,7 @@ class Subject:
     def data(self):
         """
         Constructs and returns a dictionary which can be used as a data row in participants.tsv
-        :return:
+        :return pd.DataFrame: Participant dataframe with a single row of information
         """
         participant_dict = pd.DataFrame([{'participant_id': f'sub-{self.id}',
                                           'age': self.age,

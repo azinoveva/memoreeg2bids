@@ -71,6 +71,23 @@ def eeg_events():
                 "245": "Beginning or end of the task"
             }
         },
+        "stim_file": {
+           "Description": "Filename of presented stimulus",
+           "Levels": {
+               "test.wav": "Starting sound (rolling dice)",
+               "tOne_F3_350.wav": "Auditory cue One (Eins). Participant must remember first shown object",
+               "Two_F3_350.wav": "Auditory cue Two (Zwei). Participant must remember second shown object",
+               "01_candelabra.jpg": "Candelabrum image",
+               "01_lamppost01.jpg": "Street light image",
+               "01_lighthouse.jpg": "Lighthouse image",
+               "01_nightstand.jpg": "Nightstand image",
+               "01_outdoorchair.jpg": "Garden chair image",
+               "02_crown.jpg": "Crown image",
+               "02_gazeboredone.jpg": "Gazebo image",
+               "02_radio03a.jpg": "Radio image",
+               "02_table03.jpg": "Dining table image"
+           }
+        },
         "event": {
             "Description": "Short description of marked event",
             "Levels": {
@@ -103,6 +120,7 @@ def behavioral(task):
     :param task: Name of the task. For this dataset: distractor or nodistractor
     :return: JSON sidecar with dataset description
     """
+
     contents = {
         'TaskName': task,
         'TaskDescription': 'The participant is required to lock their gaze on the fixation point every time it is on '

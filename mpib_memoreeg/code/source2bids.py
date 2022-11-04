@@ -59,7 +59,7 @@ import textfiles
 import subject as s
 
 # Create constants for easier use
-# How many participants should be converted by MNE-BIDS?
+# Which or how many participants should be converted by MNE-BIDS? (future ID sequence)
 SUBJECTS = range(1, 5)
 # Should only annotations for the whole dataset be updated?
 UPDATE_TEXT_ONLY = False
@@ -152,7 +152,9 @@ def make_bids_validator_config():
 
 
 def main():
-    # Take data from the log
+    # Main idea is: process the participants_log.tsv line by line and transform accompanying subject data.
+
+    # Read the log file
     log = pd.read_csv('../sourcedata/participants_log.tsv', sep='\t')
 
     # Map handedness information from 0/1 to L/R
@@ -163,6 +165,7 @@ def main():
     id_pattern = r'p0\d\d'
     log = log[log.Parti_ID.str.match(id_pattern)]
 
+    # Create an empty dataframe with assigned column names as basis for future participants.tsv.
     participants = pd.DataFrame(columns=['participant_id',
                                          'age',
                                          'hand',
@@ -171,11 +174,14 @@ def main():
                                          'distractor',
                                          'distractor_set'])
 
-    # There is an option to not just update text files but also convert source data anew with MNE-BIDS tool.
+    # Iterate through subjects: one subject - one row. SUBJECTS is a generated sequence of numbers
+    # and can be altered above.
     for sub_id in SUBJECTS:
 
+        # This is the data row with participant data.
         participant_data = log.iloc[sub_id - 1]
 
+        # Take all known information out of it and use it to create a Subject class instance.
         age = participant_data['Age']
         hand = participant_data['Righthanded (1=yes, 0=no)']
         sex = participant_data['Gender']
@@ -188,19 +194,27 @@ def main():
 
         participant = s.Subject(sub_id, age, sex, hand, stimuli_set, distractor_set)
 
+        # There is an option to not just update text files but also convert source data anew with MNE-BIDS tool.
         if not UPDATE_TEXT_ONLY:
+
+            # Transform accompanying data (EEG and behavioral).
             participant.eeg_to_bids()
             participant.beh_to_bids()
 
+        # Append participant info to future participants.tsv
         participants = pd.concat([participants, participant.data()], ignore_index=True)
+
+    # Fill empty places in the dataset and overwrite generated participants.tsv from MNE-BIDS with newly created one.
     participants.fillna('n/a', inplace=True)
     filename = op.join(BIDS_ROOT, "participants.tsv")
     participants.to_csv(filename, index=False, na_rep="n/a", sep="\t")
 
-    # Copy stimuli from sourcedata
-    copy_tree(op.join(DATA_PATH, "stimuli"), op.join(BIDS_ROOT, "stimuli"))
+    # Once again, copy stimui folder if more than a text update is needed.
+    if not UPDATE_TEXT_ONLY:
+        # Copy stimuli from sourcedata
+        copy_tree(op.join(DATA_PATH, "stimuli"), op.join(BIDS_ROOT, "stimuli"))
 
-    # Quite self-explanatory. Creates all the annotations for the complete dataset.
+    # Finish up with self-explanatory annotations and config files.
     make_dataset_description()
     make_participants_json()
 
