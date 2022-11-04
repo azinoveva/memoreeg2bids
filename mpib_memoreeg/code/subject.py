@@ -173,7 +173,7 @@ class Subject:
             lambda stimulus: 'n/a' if (stimulus > 156) else (stimulus % 20 - 1) * 22.5 + 11.25)
         # Add object position if exists
         events['position'] = events['trial'].transform(
-            lambda stimulus: (stimulus % 200 - 1) * 22.5 if (201 <= stimulus <= 216) else 'n/a')
+            lambda stimulus: (stimulus % 200 - 1) * 22.5 + 11.25 if (201 <= stimulus <= 216) else 'n/a')
 
         # Every object position is marked as a separate event RIGHT AFTER the event encoding an object and its
         # rotation. We use this to couple an object and its position, so that one row represents one real event.
