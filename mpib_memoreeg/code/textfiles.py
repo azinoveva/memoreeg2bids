@@ -335,14 +335,14 @@ def participants():
             "Description": "Age of a participant.",
             "Units": "years"
         },
-        "handedness": {
+        "hand": {
             "Description": "Handedness of a participant, reported by the participant.",
             "Levels": {
                 "R": "Right-handed",
                 "L": "Left-handed",
             }
         },
-        "gender": {
+        "sex": {
             "Description": "Gender of a participant, reported by the participant.",
             "Levels": {
                 "F": "Female",

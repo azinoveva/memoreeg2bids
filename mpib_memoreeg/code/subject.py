@@ -79,20 +79,33 @@ class Subject:
     """
     Class represents key data parameters for a single participant and allows for easier formatting.
     """
-    def __init__(self, subject_id, data_path=DATA_PATH):
+    # Stimulus matrix determines how stimulus IDs are assigned during the trials. E.g., STIM_MAT[1,2] contains
+    # filename for 3rd stimulus in the 2nd subset (python iteration from 0)
+    STIM_MAT = [['01_lighthouse.jpg', '02_radio03.jpg', '02_table03.jpg'],
+                ['01_candelabra.jpg', '01_outdoorchair.jpg', '02_crown.jpg'],
+                ['01_lamppost01.jpg', '01_nightstand.jpg', '02_gazeboredone.jpg']]
+
+    def __init__(self, subject_id, age, sex, hand, stimuli, distractors, data_path=DATA_PATH):
         """
         Construct necessary subject data.
         :param int subject_id: ID of the experiment participant
         """
         # Create a BIDS-ID for the subject (format: sub-XX)
         self.id = f'{subject_id:02}'
+        self.age = age
+        self.sex = sex
+        self.hand = hand
+        self.stimuli = stimuli
+        self.distractors = distractors
 
-        # Here I'm using the agreement to test every second subject without distractor.
-        if subject_id % 2 == 1:
+        # Assign task name on basis of whether received distractors value is None (which means, no distractor used in
+        # the task)
+        if distractors:
             self.task = 'distractor'
         else:
             self.task = 'nodistractor'
 
+        # Determine locations of EEG and behavioral data
         self.vhdr_path = op.join(data_path, f'eeg/p0{self.id}.vhdr')
         self.beh_path = op.join(data_path, f"behavioral/resultfile_p0{self.id}.txt")
 
@@ -108,6 +121,9 @@ class Subject:
         # Add known metadata
         raw = raw.set_channel_types({"ECG": "ecg", "HEOG": "eog", "VEOG": "eog"})
         raw.info["line_freq"] = 50
+        raw.info["subject_info"] = {'id': self.id,
+                                    'sex': {'M': 1, 'F': 2}[self.sex],
+                                    'hand': {'R': 1, 'L': 2}[self.hand]}
 
         # Use mne-bids to expand the existing data
         bids_path = BIDSPath(subject=self.id, task=self.task, root=bids_root)
@@ -133,7 +149,7 @@ class Subject:
         events['event'] = events['trial'].transform(lambda stimulus: get_object_type(stimulus))
         # Add object rotation if exists
         events['rotation'] = events['trial'].transform(
-            lambda stimulus: 'n/a' if (stimulus > 156) else (stimulus % 20 - 1) * 22.5 + 12.25)
+            lambda stimulus: 'n/a' if (stimulus > 156) else (stimulus % 20 - 1) * 22.5 + 11.25)
         # Add object position if exists
         events['position'] = events['trial'].transform(
             lambda stimulus: (stimulus % 200 - 1) * 22.5 if (201 <= stimulus <= 216) else 'n/a')
@@ -212,15 +228,18 @@ class Subject:
                           'colorset_pins', 'type_of_task', 'type_of_ings', 'position_odd_pings', 'object_test_name',
                           'block_repe_null']
 
+        # if not self.distractors:
+        #    redundant_cols += []
+
         beh_data.drop(empty_cols + redundant_cols, axis=1, inplace=True)
 
         # Correct typo in column name
         beh_data.rename(columns={'object_2_ID': 'object_2_id'}, inplace=True)
 
         # Fill empty values
-        beh_data.fillna("n/a", inplace=True)    # for true n/a
-        beh_data = beh_data.replace("NaN", "n/a", regex=True)   # for NaN as strings
-        beh_data = beh_data.replace("", "n/a", regex=True)      # for empty cells
+        beh_data.fillna("n/a", inplace=True)  # for true n/a
+        beh_data = beh_data.replace("NaN", "n/a", regex=True)  # for NaN as strings
+        beh_data = beh_data.replace("", "n/a", regex=True)  # for empty cells
 
         # Write cleared dataset into sub-<ID>_task-<taskname>_beh.tsv file
         beh_data.to_csv(bids_path, sep='\t', index=False)
@@ -230,3 +249,17 @@ class Subject:
                              extension=".json")
         json_data = textfiles.behavioral(self.task)
         textfiles.write(json_data, json_path)
+
+    def data(self):
+        """
+        Constructs and returns a dictionary which can be used as a data row in participants.tsv
+        :return:
+        """
+        participant_dict = pd.DataFrame([{'participant_id': f'sub-{self.id}',
+                                          'age': self.age,
+                                          'hand': self.hand,
+                                          'sex': self.sex,
+                                          'stimuli_set': self.stimuli,
+                                          'distractor': {True: 1, False: 0}[bool(self.distractors)],
+                                          'distractor_set': self.distractors}])
+        return participant_dict

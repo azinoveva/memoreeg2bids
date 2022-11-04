@@ -7,7 +7,7 @@ dataset_description.json
 events.json
 participants.json
 participants.tsv
-/mpib_memoreeg/README.md
+/mpib_memoreeg/README*
 /mpib_memoreeg/CHANGES
 /mpib_memoreeg/LICENSE
 .bidsignore

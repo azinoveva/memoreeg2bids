@@ -53,6 +53,8 @@ SOFTWARE.
 import os
 import os.path as op
 from distutils.dir_util import copy_tree
+
+import numpy as np
 import pandas as pd
 import urllib3
 import textfiles
@@ -81,40 +83,12 @@ def make_dataset_description():
     textfiles.write(description, filename)
 
 
-def make_participants():
+def make_participants_json():
     """
-    Create participant files:
-    - participants.tsv with description of participants' characteristics
-    - participants.json with description of columns and their values in participants.tsv
+    Create participants.json with description of columns and their values in participants.tsv
     """
-
-    # Create participants.tsv with accompanying participants.json
     filename = op.join(BIDS_ROOT, "participants.json")
     textfiles.write(textfiles.participants(), filename)
-
-    # Take data from the log
-    participants = pd.read_csv('../sourcedata/participants_log.tsv', sep='\t')
-
-    # Map handedness information from 0/1 to L/R
-    participants['Righthanded (1=yes, 0=no)'].replace({0: 'L', 1: 'R'}, inplace=True)
-
-    # We have 80 "true" participants with IDs ranging from p001 to p080.
-    # Other IDs, e.g. for pilot participants, are to filter out.
-    id_pattern = r'p0\d\d'
-    participants = participants[participants.Parti_ID.str.match(id_pattern)]
-
-    # add BIDS-formatted ID and rename columns
-    participants['participant_id'] = [f'sub-{sub:02}' for sub in range(1, 81)]
-    participants = participants.rename(
-        columns={'Age': 'age', 'Righthanded (1=yes, 0=no)': 'handedness', 'Gender': 'gender',
-                 'Stimuli_set': 'stimuli_set', 'Distractor (yes=1 no=0)': 'distractor',
-                 'Distractor_set': 'distractor_set'})
-
-    # Write relevant data to the participants.tsv file
-    filename = op.join(BIDS_ROOT, "participants.tsv")
-    participants[
-        ['participant_id', 'age', 'handedness', 'gender', 'stimuli_set', 'distractor', 'distractor_set']].to_csv(
-        filename, index=False, na_rep="n/a", sep="\t")
 
 
 def make_bidsignore():
@@ -187,24 +161,64 @@ def make_bids_validator_config():
 
 
 def main():
-    # There is an option to not just update text files but also convert source data anew with MNE-BIDS tool.
-    if not UPDATE_TEXT_ONLY:
-        for sub_id in SUBJECTS:
-            data = s.Subject(sub_id)
-            data.eeg_to_bids(BIDS_ROOT)
-            data.beh_to_bids(BIDS_ROOT)
+    # Take data from the log
+    log = pd.read_csv('../sourcedata/participants_log.tsv', sep='\t')
 
-        # Copy stimuli from sourcedata
-        copy_tree(op.join(DATA_PATH, "stimuli"), op.join(BIDS_ROOT, "stimuli"))
+    # Map handedness information from 0/1 to L/R
+    log['Righthanded (1=yes, 0=no)'].replace({0: 'L', 1: 'R'}, inplace=True)
+
+    # We have 80 "true" participants with IDs ranging from p001 to p080.
+    # Other IDs, e.g. for pilot participants, are to filter out.
+    id_pattern = r'p0\d\d'
+    log = log[log.Parti_ID.str.match(id_pattern)]
+
+    participants = pd.DataFrame(columns=['participant_id',
+                                         'age',
+                                         'hand',
+                                         'sex',
+                                         'stimuli_set',
+                                         'distractor',
+                                         'distractor_set'])
+
+    # There is an option to not just update text files but also convert source data anew with MNE-BIDS tool.
+    for sub_id in SUBJECTS:
+
+        participant_data = log.iloc[sub_id]
+
+        age = participant_data['Age']
+        hand = participant_data['Righthanded (1=yes, 0=no)']
+        sex = participant_data['Gender']
+        stimuli_set = participant_data['Stimuli_set']
+        distractor = participant_data['Distractor (yes=1 no=0)']
+        if distractor:
+            distractor_set = participant_data['Distractor_set']
+        else:
+            distractor_set = None
+
+        participant = s.Subject(sub_id, age, sex, hand, stimuli_set, distractor_set)
+
+        if not UPDATE_TEXT_ONLY:
+            participant.eeg_to_bids()
+            participant.beh_to_bids()
+
+        participants = pd.concat([participants, participant.data()], ignore_index=True)
+    participants.fillna('n/a', inplace=True)
+    filename = op.join(BIDS_ROOT, "participants.tsv")
+    participants.to_csv(filename, index=False, na_rep="n/a", sep="\t")
+
+    # Copy stimuli from sourcedata
+    copy_tree(op.join(DATA_PATH, "stimuli"), op.join(BIDS_ROOT, "stimuli"))
 
     # Quite self-explanatory. Creates all the annotations for the complete dataset.
     make_dataset_description()
-    make_participants()
-    make_bidsignore()
-    make_bids_validator_config()
+    make_participants_json()
+
     make_readme()
     make_license()
     make_changes()
+
+    make_bidsignore()
+    make_bids_validator_config()
 
 
 if __name__ == '__main__':
