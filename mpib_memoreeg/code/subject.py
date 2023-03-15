@@ -245,6 +245,9 @@ class Subject:
         # Drop duplicate header rows (needs to happen before checking for empty cells!)
         beh_data = beh_data[beh_data.iloc[:, 0] != beh_data.columns[0]]
 
+        # Drop first duplicate trials if restarted the experiment
+        beh_data.drop_duplicates(subset=['trial'], keep='last', inplace=True)
+
         # Columns to drop
         empty_cols = [col for col in beh_data.columns if
                       (beh_data[col].isnull().all() or beh_data[col].eq("NaN").all())]

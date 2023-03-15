@@ -60,7 +60,7 @@ import subject as s
 
 # Create constants for easier use
 # Which or how many participants should be converted by MNE-BIDS? (future ID sequence)
-SUBJECTS = range(1, 5)
+SUBJECTS = range(1, 81)
 # Should only annotations for the whole dataset be updated?
 UPDATE_TEXT_ONLY = False
 # Default data root for BIDS to convert into
@@ -177,7 +177,9 @@ def main():
     # Iterate through subjects: one subject - one row. SUBJECTS is a generated sequence of numbers
     # and can be altered above.
     for sub_id in SUBJECTS:
-
+        if sub_id == 49:
+            # Data for sub-49 not collected (see README/Missing data)
+            continue
         # This is the data row with participant data.
         participant_data = log.iloc[sub_id - 1]
 
@@ -198,7 +200,7 @@ def main():
         if not UPDATE_TEXT_ONLY:
 
             # Transform accompanying data (EEG and behavioral).
-            participant.eeg_to_bids()
+            #participant.eeg_to_bids()
             participant.beh_to_bids()
 
         # Append participant info to future participants.tsv

@@ -116,7 +116,7 @@ def eeg_events():
 
 def behavioral(task):
     """
-    Generates an _beh.json file with description of behavioral events' dataset
+    Generates a _beh.json file with description of behavioral events' dataset
     :param task: Name of the task. For this dataset: distractor or nodistractor
     :return: JSON sidecar with dataset description
     """
@@ -550,9 +550,15 @@ and for how long, is determined mostly by the participant's readiness in each in
 
 Collected eye tracking data can be found in the [sourcedata/eyetracking](./sourcedata/eyetracking) folder.
 
-### Missing data
+### Missing or corrupted data
 
+- sub-7: Technical issues with audio cues during the recording
 - sub-20: EEG data missing (technical error, no EEG data recorded)
+- sub-33: Eye-tracker did not fixate on the eye properly. Restarted the task after block 1
+- sub-49: Participant was not able to proceed with the recording
+- sub-54: BrainAmp's battery out of charge after 7 trials
+- sub-63: Needed a WC-pause after 174 trials.
+- sub-70: The eye-tracker was recalibrated after 6 blocks
 
 ## Acknowledgements
 
