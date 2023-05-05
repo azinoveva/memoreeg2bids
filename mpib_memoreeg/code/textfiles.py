@@ -396,17 +396,11 @@ def dataset_description():
         ],
         "Acknowledgements": "We thank Anouk Bielefeldt, Anna Faschinger, Aleksandra Zinoveva and Jann Wäscher for "
                             "help with participant management and data collection.",
-        "HowToAcknowledge": "Please cite. The reference will be here soon!",
         "EthicsApproval": [
             "The study was approved by the ethics committee of the Max Planck Institute for Human Development, Berlin, "
             "Germany."
         ],
-        "ReferencesAndLinks": [
-            "Reference One",
-            "Reference Two",
-            "Reference Three"
-        ],
-        "DatasetDOI": "Will come with the acknowledgement."
+        "DatasetDOI": "https://doi.org/10.1101/2022.11.17.516917"
     }
 
     return contents
@@ -434,7 +428,7 @@ The data is organized in Brain Imaging Data Structure format (BIDS, https://bids
     
 Relevant information can be also found here:
     
-- Preprint: TBA
+- Preprint: https://doi.org/10.1101/2022.11.17.516917
     
 Source data is currently available on the file server of MPIB Berlin only. 
 
@@ -456,12 +450,9 @@ Please see the [LICENSE.txt](./LICENSE.txt) file for details.
 
 ## Overview
 
-- [ ] Project name (if relevant)
+### MemorEEG
 
-- [ ] Year(s) that the project ran
-
-If no `scans.tsv` is included, this could at least cover when the data acquisition
-starter and ended. Local time of day is particularly relevant to subject state.
+The dataset has been acquired during the year 2022.
 
 - [ ] Brief overview of the tasks in the experiment
 
