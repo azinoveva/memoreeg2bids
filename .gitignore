@@ -12,3 +12,4 @@ participants.tsv
 /mpib_memoreeg/LICENSE
 .bidsignore
 .bids-validator-config.json
+.idea
