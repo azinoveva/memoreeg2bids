@@ -3,7 +3,7 @@
 This code processes source data of the MemorEEG experiment conducted at the Max Planck Institute for Human 
 Development (MPIB Berlin) into raw Brain Imaging Data Structure format (BIDS, https://bids.neuroimaging.io/).
 
-Example with source data for four participants is currently available on the file server of MPIB Berlin only (see public folder of `zinoveva` in `FB-ARC/AMD` for an example).
+Example with source data for four participants is currently available on the file server of MPIB Berlin.
 
 Required dependencies:
 - `mne` <= 1.2.0
