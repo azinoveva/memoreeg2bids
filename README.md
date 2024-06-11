@@ -34,10 +34,3 @@ BIDS_ROOT
 │   ├── irb_data_protection
 │   └── participants_log.tsv
 ...
-```
-
-## TODO: 
-
-- [ ] CHANGES log 
-- [ ] Incorporate stimuli
-- [ ] Make [@lindedomingo](https://arc-git.mpib-berlin.mpg.de/lindedomingo) write me a nice dataset README
